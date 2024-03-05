@@ -51,7 +51,7 @@ namespace OriginalLib.Behaviour
 			}
 			else if (Instance != this)
 			{
-				Debug.Log($"2個目のインスタンスが作成されました。破棄します。<br>{this}");
+				Debug.Log($"2個目のインスタンスが作成されました。破棄します。\r\n{this}");
 				Destroy(gameObject);
 			}
 		}

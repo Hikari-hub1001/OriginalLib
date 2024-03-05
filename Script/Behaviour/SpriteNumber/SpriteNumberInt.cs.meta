@@ -1,0 +1,24 @@
+fileFormatVersion: 2
+guid: 2497801aa26ad1c4ba612e4f7430a4bf
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _zero: {fileID: 21300000, guid: 298998e6f07b31a409730faf3f85f0e3, type: 3}
+  - _one: {fileID: 21300000, guid: 3f9f0a0f1462c3c4cb64e6380dd40337, type: 3}
+  - _two: {fileID: 21300000, guid: 2e57b48f54dff5d4faa15d219a9d2350, type: 3}
+  - _three: {fileID: 21300000, guid: 58f77f61d3915c0419b5d6e6b801a78e, type: 3}
+  - _four: {fileID: 21300000, guid: 9297715acbfb9bc4aa9904219681edf9, type: 3}
+  - _five: {fileID: 21300000, guid: 516f0d73390d13248ae490970e730842, type: 3}
+  - _six: {fileID: 21300000, guid: c9dfa4662cde9bb4d9da7e04592f7879, type: 3}
+  - _seven: {fileID: 21300000, guid: 03857682c9eb6da4693385056be9738a, type: 3}
+  - _eight: {fileID: 21300000, guid: 35c55ffe132dabd49bfe4abb5eb04eec, type: 3}
+  - _nine: {fileID: 21300000, guid: 135b28f08fcd08e488a7ad080eba9de9, type: 3}
+  - _minusSprite: {fileID: 21300000, guid: cd90ce6f4e3b05e4bb6ce26244ef8c12, type: 3}
+  - _plusSprite: {fileID: 21300000, guid: 9f6c5fef6c0f14e48ae3224a39471eaf, type: 3}
+  - _pointSprite: {fileID: 21300000, guid: c4734cdbfef8434449687e884f1e7cc6, type: 3}
+  executionOrder: 0
+  icon: {fileID: 2800000, guid: c7535e3370d42454e9642200a74a4b12, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

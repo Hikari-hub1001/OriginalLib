@@ -14,9 +14,10 @@
 
 using UnityEngine;
 #if ENABLE_TMP
-using TMPro;
+using TextComponent = TMPro.TextMeshProUGUI;
+#else
+using TextComponent = UnityEngine.UI.Text;
 #endif
-using UnityEngine.UI;
 
 namespace OriginalLib
 {
@@ -27,7 +28,7 @@ namespace OriginalLib
 		/// </summary>
 		/// <param name="message">表示するテキスト</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message)
+		public static TextComponent CreateText(string message)
 		{
 			return CreateText(message, new(0.0f, 0.0f, 0.0f), new(100.0f, 100.0f), Color.black, true);
 		}
@@ -38,7 +39,7 @@ namespace OriginalLib
 		/// <param name="message">表示するテキスト</param>
 		/// <param name="pos">座標</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message, Vector3 pos)
+		public static TextComponent CreateText(string message, Vector3 pos)
 		{
 			return CreateText(message, pos, new(100.0f, 100.0f), Color.black, true);
 		}
@@ -50,7 +51,7 @@ namespace OriginalLib
 		/// <param name="pos">座標</param>
 		/// <param name="size">サイズ</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message, Vector3 pos, Vector2 size)
+		public static TextComponent reateText(string message, Vector3 pos, Vector2 size)
 		{
 			return CreateText(message, pos, size, Color.black, true);
 		}
@@ -63,7 +64,7 @@ namespace OriginalLib
 		/// <param name="size">サイズ</param>
 		/// <param name="parent">親オブジェクト</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message, Vector3 pos, Vector2 size, GameObject parent)
+		public static TextComponent CreateText(string message, Vector3 pos, Vector2 size, Transform parent)
 		{
 			return CreateText(message, pos, size, default, true, parent);
 		}
@@ -76,7 +77,7 @@ namespace OriginalLib
 		/// <param name="size">サイズ</param>
 		/// <param name="col">色</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message, Vector3 pos, Vector2 size, Color col)
+		public static TextComponent CreateText(string message, Vector3 pos, Vector2 size, Color col)
 		{
 			return CreateText(message, pos, size, col, true);
 		}
@@ -90,7 +91,7 @@ namespace OriginalLib
 		/// <param name="col">色</param>
 		/// <param name="active">活性状態</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message, Vector3 pos, Vector2 size, Color col, bool active)
+		public static TextComponent CreateText(string message, Vector3 pos, Vector2 size, Color col, bool active)
 		{
 			//キャンバスの検索
 			var canvas = HierarchyUtil.FindComponent<Canvas>();
@@ -100,40 +101,38 @@ namespace OriginalLib
 				canvas = CreateCanvas();
 			}
 
-			return CreateText(message, pos, size, col, active, canvas);
+			return CreateText(message, pos, size, col, active, canvas.transform);
 		}
 
 
 		/// <summary>
 		/// Image作成
 		/// </summary>
-		/// <param name="sprite">表示する画像</param>
+		/// <param name="message">表示する文字列</param>
 		/// <param name="pos">座標</param>
 		/// <param name="size">サイズ</param>
 		/// <param name="col">色</param>
 		/// <param name="active">活性状態</param>
 		/// <param name="parent">親オブジェクト</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateText(string message, Vector3 pos = default, Vector2 size = default, Color col = default, bool active = true, GameObject parent = null)
+		public static TextComponent CreateText(string message, Vector3 pos = default, Vector2 size = default, Color col = default, bool active = true, Transform parent = null)
 		{
 			GameObject go = new();
 
-			go.transform.parent = parent?.transform;
-#if ENABLE_TMP
-			var tmptxt = go.AddComponent<TextMeshProUGUI>();
-			tmptxt.text = message;
-			tmptxt.color = col;
-#else
+			go.transform.parent = parent;
 
-#endif
+			var txt = go.AddComponent<TextComponent>();
 
-			var rt = go.GetComponent<RectTransform>();
+			txt.text = message;
+			txt.color = col;
+
+			var rt = go.AddComponent<RectTransform>();
 			rt.anchoredPosition = pos;
 			rt.sizeDelta = size;
 
 			go.SetActive(active);
 
-			return go;
+			return txt;
 		}
 
 
@@ -145,12 +144,8 @@ namespace OriginalLib
 		public static void SetText(GameObject go, string message)
 		{
 			if (go == null) { return; }
-#if ENABLE_TMP
-			var text = go.GetComponent<TMP_Text>();
+			var text = go.GetComponent<TextComponent>();
 			if (text == null) { return; }
-#else
-			var text = go.GetComponent<Text>();
-#endif
 			text.text = message;
 		}
 
@@ -223,22 +218,12 @@ namespace OriginalLib
 		{
 			if (go == null) { return; }
 			if (col == null) { return; }
-#if ENABLE_TMP
-			var tmpText = go.GetComponent<TMP_Text>();
-			if (tmpText != null)
-			{
-				tmpText.color = col;
-				return;
-			}
-#else
-
-			var text = go.GetComponent<Text>();
+			var text = go.GetComponent<TextComponent>();
 			if (text != null)
 			{
 				text.color = col;
 				return;
 			}
-#endif
 		}
 
 		/// <summary>
@@ -253,6 +238,17 @@ namespace OriginalLib
 			var obj = HierarchyUtil.FindObject(go, objName);
 			if (obj == null) { return; }
 			SetTextCol(obj, col);
+		}
+	}
+
+	/// <summary>
+	/// 上記UIUtilクラスの静的メソッドを拡張メソッドに変換
+	/// </summary>
+	public static partial class UIUtil_Ex
+	{
+		public static void SetText(this GameObject go, string message)
+		{
+			UIUtil.SetText(go, message);
 		}
 	}
 }

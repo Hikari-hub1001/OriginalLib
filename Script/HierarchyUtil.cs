@@ -54,12 +54,12 @@ namespace OriginalLib
 		/// コンポーネントからオブジェクトを検索する
 		/// </summary>
 		/// <param name="type">検索するコンポーネント</param>
-		/// <returns>コンポーネントを持ったオブジェクト</returns>
-		public static GameObject FindComponent(System.Type type)
+		/// <returns>コンポーネントを持ったオブジェクト<	/returns>
+		public static Component FindComponent(System.Type type)
 		{
-			var o = Object.FindObjectOfType(type);
+			Object o = Object.FindObjectOfType(type);
 			if (o == null) return null;
-			return FindObject(o.name);
+			return o as Component;
 		}
 
 		/// <summary>
@@ -67,9 +67,9 @@ namespace OriginalLib
 		/// </summary>
 		/// <typeparam name="T">検索するコンポーネント</typeparam>
 		/// <returns>コンポーネントを持ったオブジェクト</returns>
-		public static GameObject FindComponent<T>()
+		public static T FindComponent<T>() where T : Component
 		{
-			return FindComponent(typeof(T));
+			return FindComponent(typeof(T)) as T;
 		}
 
 		/// <summary>
@@ -84,6 +84,7 @@ namespace OriginalLib
 			var objects = GameObject.FindObjectsOfType<T>(includeInactive);
 			foreach (var obj in objects)
 			{
+				if (!(obj.gameObject.activeSelf && includeInactive)) continue;
 				action?.Invoke(obj);
 			}
 		}

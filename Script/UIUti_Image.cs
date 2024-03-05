@@ -24,9 +24,18 @@ namespace OriginalLib
 		/// </summary>
 		/// <param name="sprite">表示する画像</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite)
+		public static Image CreateImage(Sprite sprite)
 		{
 			return CreateImage(sprite, new(0.0f, 0.0f, 0.0f), new(100.0f, 100.0f), Color.white, true);
+		}
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawImage(Texture2D texture)
+		{
+			return CreateRawImage(texture, new(0.0f, 0.0f, 0.0f), new(100.0f, 100.0f), Color.white, true);
 		}
 
 		/// <summary>
@@ -35,9 +44,19 @@ namespace OriginalLib
 		/// <param name="sprite">表示する画像</param>
 		/// <param name="pos">座標</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite, Vector3 pos)
+		public static Image CreateImage(Sprite sprite, Vector3 pos)
 		{
 			return CreateImage(sprite, pos, new(100.0f, 100.0f), Color.white, true);
+		}
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <param name="pos">座標</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawImage(Texture2D texture, Vector3 pos)
+		{
+			return CreateRawImage(texture, pos, new(100.0f, 100.0f), Color.white, true);
 		}
 
 		/// <summary>
@@ -47,9 +66,20 @@ namespace OriginalLib
 		/// <param name="pos">座標</param>
 		/// <param name="size">サイズ</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite, Vector3 pos, Vector2 size)
+		public static Image CreateImage(Sprite sprite, Vector3 pos, Vector2 size)
 		{
 			return CreateImage(sprite, pos, size, Color.white, true);
+		}
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <param name="pos">座標</param>
+		/// <param name="size">サイズ</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawImage(Texture2D texture, Vector3 pos, Vector2 size)
+		{
+			return CreateRawImage(texture, pos, size, Color.white, true);
 		}
 
 		/// <summary>
@@ -60,9 +90,22 @@ namespace OriginalLib
 		/// <param name="size">サイズ</param>
 		/// <param name="parent">親オブジェクト</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite, Vector3 pos, Vector2 size, GameObject parent)
+		public static Image CreateImage(Sprite sprite, Vector3 pos, Vector2 size, GameObject parent)
 		{
-			return CreateImage(sprite, pos, size, default, true, parent);
+			return CreateImage(sprite, pos, size, default, true, parent.transform);
+		}
+
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <param name="pos">座標</param>
+		/// <param name="size">サイズ</param>
+		/// <param name="parent">親オブジェクト</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawImage(Texture2D texture, Vector3 pos, Vector2 size, GameObject parent)
+		{
+			return CreateRawImage(texture, pos, size, default, true, parent.transform);
 		}
 
 		/// <summary>
@@ -73,9 +116,21 @@ namespace OriginalLib
 		/// <param name="size">サイズ</param>
 		/// <param name="col">色</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite, Vector3 pos, Vector2 size, Color col)
+		public static Image CreateImage(Sprite sprite, Vector3 pos, Vector2 size, Color col)
 		{
 			return CreateImage(sprite, pos, size, col, true);
+		}
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <param name="pos">座標</param>
+		/// <param name="size">サイズ</param>
+		/// <param name="col">色</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawmage(Texture2D texture, Vector3 pos, Vector2 size, Color col)
+		{
+			return CreateRawImage(texture, pos, size, col, true);
 		}
 
 		/// <summary>
@@ -87,7 +142,7 @@ namespace OriginalLib
 		/// <param name="col">色</param>
 		/// <param name="active">活性状態</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite, Vector3 pos, Vector2 size, Color col, bool active)
+		public static Image CreateImage(Sprite sprite, Vector3 pos, Vector2 size, Color col, bool active)
 		{
 			//キャンバスの検索
 			var canvas = HierarchyUtil.FindComponent<Canvas>();
@@ -96,7 +151,28 @@ namespace OriginalLib
 				//見つからない場合は生成
 				canvas = CreateCanvas();
 			}
-			return CreateImage(sprite, pos, size, col, active, canvas);
+			return CreateImage(sprite, pos, size, col, active, canvas.transform);
+		}
+
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <param name="pos">座標</param>
+		/// <param name="size">サイズ</param>
+		/// <param name="col">色</param>
+		/// <param name="active">活性状態</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawImage(Texture2D texture, Vector3 pos, Vector2 size, Color col, bool active)
+		{
+			//キャンバスの検索
+			var canvas = HierarchyUtil.FindComponent<Canvas>();
+			if (canvas == null)
+			{
+				//見つからない場合は生成
+				canvas = CreateCanvas();
+			}
+			return CreateRawImage(texture, pos, size, col, active, canvas.transform);
 		}
 
 		/// <summary>
@@ -109,11 +185,11 @@ namespace OriginalLib
 		/// <param name="active">活性状態</param>
 		/// <param name="parent">親オブジェクト</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static GameObject CreateImage(Sprite sprite, Vector3 pos = default, Vector2 size = default, Color col = default, bool active = true, GameObject parent = null)
+		public static Image CreateImage(Sprite sprite, Vector3 pos = default, Vector2 size = default, Color col = default, bool active = true, Transform parent = null)
 		{
 			GameObject go = new();
 
-			go.transform.parent = parent?.transform;
+			go.transform.parent = parent;
 
 			var img = go.AddComponent<Image>();
 			img.sprite = sprite;
@@ -125,9 +201,37 @@ namespace OriginalLib
 
 			go.SetActive(active);
 
-			return go;
+			return img;
 		}
 
+		/// <summary>
+		/// RawImage作成
+		/// </summary>
+		/// <param name="texture">表示する画像</param>
+		/// <param name="pos">座標</param>
+		/// <param name="size">サイズ</param>
+		/// <param name="col">色</param>
+		/// <param name="active">活性状態</param>
+		/// <param name="parent">親オブジェクト</param>
+		/// <returns>作成したオブジェクト</returns>
+		public static RawImage CreateRawImage(Texture2D texture, Vector3 pos = default, Vector2 size = default, Color col = default, bool active = true, Transform parent = null)
+		{
+			GameObject go = new();
+
+			go.transform.parent = parent;
+
+			var img = go.AddComponent<RawImage>();
+			img.texture = texture;
+			img.color = col;
+
+			var rt = go.GetComponent<RectTransform>();
+			rt.anchoredPosition = pos;
+			rt.sizeDelta = size;
+
+			go.SetActive(active);
+
+			return img;
+		}
 
 		/// <summary>
 		/// スプライト変更
@@ -221,4 +325,20 @@ namespace OriginalLib
 			SetImageCol(obj, col);
 		}
 	}
+
+	/// <summary>
+	/// 上記UIUtilクラスの静的メソッドを拡張メソッドに変換
+	/// </summary>
+	public static partial class UIUtil_Ex
+	{
+		public static void SetSprite(this GameObject go, Sprite sprite)
+		{
+			UIUtil.SetSprite(go, sprite);
+		}
+		public static void SetSprite(this GameObject go, Texture2D texture)
+		{
+			UIUtil.SetRawImage(go, texture);
+		}
+	}
+
 }

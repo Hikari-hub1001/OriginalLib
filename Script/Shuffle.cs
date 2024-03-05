@@ -7,7 +7,6 @@
 //
 //============================================================================================================================
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,7 +30,7 @@ namespace OriginalLib
 		/// <param name="list">シャッフルするリスト</param>
 		/// <param name="cnt">分割数(基本は7)</param>
 		/// <returns>シャッフル後のリスト</returns>
-		public static List<T> Shuffle_Deel<T>(List<T> list,int cnt=7)
+		public static List<T> Shuffle_Deel<T>(List<T> list, int cnt = 7)
 		{
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
@@ -39,15 +38,15 @@ namespace OriginalLib
 			List<List<T>> deckList = new();
 
 			//7つの山を用意
-			for(int i= 0; i < cnt; i++)
+			for (int i = 0; i < cnt; i++)
 			{
 				deckList.Add(new());
 			}
 
 			//元の山を指定の数に分割
-			for(int i=0; i<list.Count;i++)
+			for (int i = 0; i < list.Count; i++)
 			{
-				deckList[i%cnt].Add(list[i]);
+				deckList[i % cnt].Add(list[i]);
 			}
 
 			List<T> result = new();
@@ -63,7 +62,6 @@ namespace OriginalLib
 			return result;
 		}
 
-
 		/// <summary>
 		/// ランダムシャッフル
 		/// 完全にランダムに積み上げていく
@@ -78,8 +76,8 @@ namespace OriginalLib
 		{
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
-			
-			List<T>result=new();
+
+			List<T> result = new();
 
 			while (0 < list.Count)
 			{
@@ -103,7 +101,7 @@ namespace OriginalLib
 		/// <param name="list">シャッフルするリスト</param>
 		/// <param name="cnt">シャッフル回数(基本は20)</param>
 		/// <returns>シャッフル後のリスト</returns>
-		public static List<T> Shuffle_Cut<T>(List<T> list ,int cnt = 20)
+		public static List<T> Shuffle_Cut<T>(List<T> list, int cnt = 20)
 		{
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
@@ -136,17 +134,17 @@ namespace OriginalLib
 		/// <param name="list">シャッフルするリスト</param>
 		/// <param name="cnt">シャッフル回数(基本は10)</param>
 		/// <returns>シャッフル後のリスト</returns>
-		public static List<T> Shuffle_Hindu<T>(List<T> list,int cnt = 10)
+		public static List<T> Shuffle_Hindu<T>(List<T> list, int cnt = 10)
 		{
 			//リスト配列が5未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 5) { return list; }
 
-			for(int i = 0; i < cnt; i++)
+			for (int i = 0; i < cnt; i++)
 			{
 				//1～リストの後ろから3番目で乱数取得
-				int index1 =  Random.Range(1, list.Count-3);
+				int index1 = Random.Range(1, list.Count - 3);
 				//index+2～リスト-1の範囲で乱数取得
-				int index2 = Random.Range(index1+1, list.Count-1);
+				int index2 = Random.Range(index1 + 1, list.Count - 1);
 
 				//index1番目からindex2番目までの要素を避難
 				List<T> backUp = list.GetRange(index1, index2 - index1);
@@ -176,11 +174,11 @@ namespace OriginalLib
 			List<T>[] decks = new List<T>[2];
 			//listを二つに分割
 			decks[0] = list.GetRange(0, list.Count / 2);
-			decks[1] = list.GetRange(list.Count/2+1,list.Count-decks[0].Count);
+			decks[1] = list.GetRange(list.Count / 2 + 1, list.Count - decks[0].Count);
 
 			List<T> result = new();
-			
-			while(true)
+
+			while (true)
 			{
 				//どちらかのリストから1つ結果リストに移動
 				int index = Random.Range(0, 2);
@@ -188,7 +186,7 @@ namespace OriginalLib
 				decks[index].RemoveAt(0);
 
 				//どちらかが使い切ったら
-				if(decks[0].Count == 0 || decks[1].Count == 0)
+				if (decks[0].Count == 0 || decks[1].Count == 0)
 				{
 					//残りを結果に入れる
 					result.AddRange(decks[0]);
@@ -198,6 +196,33 @@ namespace OriginalLib
 			}
 
 			return result;
+		}
+	}
+
+	/// <summary>
+	/// 上記シャッフルクラスの静的メソッドを拡張メソッドに変換
+	/// </summary>
+	public static class Shuffle_Ex
+	{
+		public static List<T> Shuffle_Deel<T>(this List<T> list, int cnt = 7)
+		{
+			return Shuffle.Shuffle_Deel(list, cnt);
+		}
+		public static List<T> Shuffle_Cut<T>(this List<T> list, int cnt = 20)
+		{
+			return Shuffle.Shuffle_Cut(list, cnt);
+		}
+		public static List<T> Shuffle_Fallow<T>(this List<T> list)
+		{
+			return Shuffle.Shuffle_Fallow(list);
+		}
+		public static List<T> Shuffle_Random<T>(this List<T> list)
+		{
+			return Shuffle.Shuffle_Random(list);
+		}
+		public static List<T> Shuffle_Hindu<T>(this List<T> list, int cnt = 10)
+		{
+			return Shuffle.Shuffle_Hindu(list, cnt);
 		}
 	}
 }
