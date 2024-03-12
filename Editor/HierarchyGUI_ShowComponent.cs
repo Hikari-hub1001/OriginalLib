@@ -17,7 +17,7 @@ public static class HierarchyGUI_ShowComponent
 		UnityEditor.EditorApplication.delayCall +=
 			() =>
 			{
-				Menu.SetChecked("Menu/ComponentIcon", IconShow);
+				Menu.SetChecked("OriginalLib/ComponentIcon", IconShow);
 			};
 
 		EditorApplication.hierarchyWindowItemOnGUI += OnGUI;
@@ -86,4 +86,15 @@ public static class HierarchyGUI_ShowComponent
 
 		return false;
 	}
+
+
+	[MenuItem("OriginalLib/ComponentIcon", priority = 10)]
+	private static void ComponentIconShow()
+	{
+		IconShow = !IconShow;
+		Menu.SetChecked("OriginalLib/ComponentIcon", IconShow);
+		EditorUserSettings.SetConfigValue("ComponentIcon", IconShow.ToString());
+	}
+
+
 }

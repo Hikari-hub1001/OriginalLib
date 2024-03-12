@@ -86,13 +86,5 @@ namespace OriginalLib.Behaviour
 				EditorUtility.SetDirty(_target);
 			}
 		}
-
-		[MenuItem("OriginalLib/Test", priority = 10)]
-		private static void ComponentIconShow()
-		{
-			Debug.Log("‚Ä‚·‚Æ");
-		}
-
-
 	}
 }
