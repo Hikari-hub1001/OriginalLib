@@ -1,7 +1,6 @@
-using UnityEngine;
-using UnityEditor;
-using System.Linq;
 using System;
+using UnityEditor;
+using UnityEngine;
 
 public static class HierarchyGUI_ShowComponent
 {

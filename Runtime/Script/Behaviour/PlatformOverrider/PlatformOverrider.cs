@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
 namespace OriginalLib.Platform
 {
@@ -30,7 +30,7 @@ namespace OriginalLib.Platform
 		public Vector2 pivot = new(0.5f, 0.5f);
 
 		[SerializeField]
-		public Vector3 rotation;
+		public Quaternion rotation = Quaternion.identity;
 
 		[SerializeField]
 		public Vector3 scale = new(1.0f, 1.0f, 1.0f);
@@ -50,33 +50,34 @@ namespace OriginalLib.Platform
 	{
 		#region 変数宣言
 
-		private OverriderSettings Default = new(false);
+
+		[SerializeField, HideInInspector] private OverriderSettings Default = new(false);
 #if UNITY_EDITOR || UNITY_IOS || UNITY_ANDROID
-		private OverriderSettings MobilePortrait = new(false);
-		private OverriderSettings MobileLandscape = new(false);
-		private OverriderSettings TabletPortrait;
-		private OverriderSettings TabletLandscape;
+		[SerializeField, HideInInspector] private OverriderSettings MobilePortrait = new(false);
+		[SerializeField, HideInInspector] private OverriderSettings MobileLandscape = new(false);
+		//[SerializeField, HideInInspector] private OverriderSettings TabletPortrait;
+		//[SerializeField, HideInInspector] private OverriderSettings TabletLandscape;
 		[HideInInspector]
 		public bool isChange;
 #endif
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX
-		private OverriderSettings MacOS = new(true);
+		[SerializeField, HideInInspector] private OverriderSettings MacOS = new(true);
 #endif
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
-		private OverriderSettings WindowsOS = new(true);
+		[SerializeField, HideInInspector] private OverriderSettings WindowsOS = new(true);
 #endif
 #if UNITY_EDITOR || UNITY_PS5
-		private OverriderSettings PS5 = new(true);
+		[SerializeField, HideInInspector] private OverriderSettings PS5 = new(true);
 #endif
 #if UNITY_EDITOR || UNITY_PS4
-		private OverriderSettings PS4 = new(true);
+		[SerializeField, HideInInspector] private OverriderSettings PS4 = new(true);
 #endif
 		private RectTransform rect;
 		#endregion
 
 		private void Start()
 		{
-#if UNITY_EDITOR
+#if UNITY_EDITOR 
 
 			rect = GetComponent<RectTransform>();
 #elif UNITY_IOS || UNITY_ANDROID
@@ -89,7 +90,7 @@ namespace OriginalLib.Platform
 				SetRectTransform(PlatformType.MobileLandscape);
 			}
 #elif UNITY_STANDALONE_WIN
-			Debug.Log("エディターです");
+			Debug.Log("Windowsです");
 			SetRectTransform(PlatformType.WindowsOS);
 #elif UNITY_STANDALONE_OSX
 			Debug.Log("macOSです");
@@ -158,12 +159,12 @@ namespace OriginalLib.Platform
 
 		void Rect2Os(OverriderSettings os)
 		{
-			if(os.useDefault)
+			if (os.useDefault)
 			{
 				Rect2Os(Default);
 				return;
 			}
-			if(rect == null)
+			if (rect == null)
 			{
 				rect = GetComponent<RectTransform>();
 			}
@@ -174,11 +175,10 @@ namespace OriginalLib.Platform
 			rect.sizeDelta = os.sizeDelta;
 			rect.offsetMin = os.offsetMin;
 			rect.offsetMax = os.offsetMax;
-			rect.rotation = Quaternion.Euler(os.rotation);
+			rect.rotation = os.rotation;
 			rect.localScale = os.scale;
 			gameObject.SetActive(os.activation);
 		}
-
 
 	}
 }

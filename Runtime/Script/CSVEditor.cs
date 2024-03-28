@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using System.Linq;
 
 namespace OriginalLib
 {
@@ -184,7 +184,7 @@ namespace OriginalLib
 					foreach (var item in data)
 					{
 						var line = fields.Select(field => GetFieldValue(field, item)).Concat(properties.Select(property => GetPropertyValue(property, item))).ToList();
-						for(int i= 0;i < line.Count();i++)
+						for (int i = 0; i < line.Count(); i++)
 						{
 							if (line[i] is string)
 							{

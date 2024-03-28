@@ -22,6 +22,7 @@ namespace OriginalLib.Platform
 		{
 			_target = target as PlatformOverrider;
 			rect = _target.GetComponent<RectTransform>();
+			os = SetSetting(pog.m_SelectTab);
 		}
 
 		/// <summary>
@@ -48,8 +49,12 @@ namespace OriginalLib.Platform
 				}
 
 				EditorGUI.BeginChangeCheck();
+
+				EditorGUI.BeginDisabledGroup(UnityEngine.SystemInfo.deviceModel != UnityEngine.Device.SystemInfo.deviceModel);
 				//Group�ݒ莞�̓{�^����\��
 				PlatformOverriderGroupEditor.PratformButton(pog);
+				EditorGUI.EndDisabledGroup();
+
 				if (EditorGUI.EndChangeCheck())
 				{
 					// 値が変更されたときの処理
@@ -61,6 +66,26 @@ namespace OriginalLib.Platform
 				{
 					os = SetSetting(pog.m_SelectTab);
 					Os2Rect();
+				}
+
+				EditorGUI.BeginChangeCheck();
+				EditorGUI.BeginDisabledGroup(pog.m_SelectTab == PlatformType.Default);
+				os.useDefault = EditorGUILayout.Toggle("UseDefault", os.useDefault);
+				EditorGUI.EndDisabledGroup();
+				if (EditorGUI.EndChangeCheck())
+				{
+					if (os.useDefault)
+					{
+						pog.isChange = true;
+						os = SetSetting(PlatformType.Default);
+						Rect2Os();
+					}
+					else
+					{
+						pog.isChange = true;
+						os = SetSetting(pog.m_SelectTab);
+						Rect2Os();
+					}
 				}
 			}
 
@@ -75,33 +100,72 @@ namespace OriginalLib.Platform
 			return val;
 		}
 
-
+		/// <summary>
+		/// 設定値に今のRecttransformを保存
+		/// </summary>
 		void Os2Rect()
 		{
-			os.position = rect.anchoredPosition;
-			os.anchorMin = rect.anchorMin;
-			os.anchorMax = rect.anchorMax;
-			os.pivot = rect.pivot;
-			os.sizeDelta = rect.sizeDelta;
-			os.offsetMin = rect.offsetMin;
-			os.offsetMax = rect.offsetMax;
-			os.rotation = rect.rotation.eulerAngles;
-			os.scale = rect.localScale;
-			os.activation = _target.gameObject.activeSelf;
+			if (!os.useDefault)
+			{
+				os.position		= rect.anchoredPosition;
+				os.anchorMin	= rect.anchorMin;
+				os.anchorMax	= rect.anchorMax;
+				os.pivot		= rect.pivot;
+				os.sizeDelta	= rect.sizeDelta;
+				os.offsetMin	= rect.offsetMin;
+				os.offsetMax	= rect.offsetMax;
+				os.rotation		= rect.rotation;
+				os.scale		= rect.localScale;
+				os.activation	= _target.gameObject.activeSelf;
+			}
+			else
+			{
+				var setting = SetSetting(PlatformType.Default);
+				setting.position	= rect.anchoredPosition;
+				setting.anchorMin	= rect.anchorMin;
+				setting.anchorMax	= rect.anchorMax;
+				setting.pivot		= rect.pivot;
+				setting.sizeDelta	= rect.sizeDelta;
+				setting.offsetMin	= rect.offsetMin;
+				setting.offsetMax	= rect.offsetMax;
+				setting.rotation	= rect.rotation;
+				setting.scale		= rect.localScale;
+				setting.activation	= _target.gameObject.activeSelf;
+			}
 		}
 
+		/// <summary>
+		/// 設定値をRecttransformに反映させる
+		/// </summary>
 		void Rect2Os()
 		{
-			rect.anchoredPosition = os.position;
-			rect.anchorMin = os.anchorMin;
-			rect.anchorMax = os.anchorMax;
-			rect.pivot = os.pivot;
-			rect.sizeDelta = os.sizeDelta;
-			rect.offsetMin = os.offsetMin;
-			rect.offsetMax = os.offsetMax;
-			rect.rotation = Quaternion.Euler(os.rotation);
-			rect.localScale = os.scale;
-			_target.gameObject.SetActive(os.activation);
+			if (!os.useDefault)
+			{
+				rect.anchoredPosition	= os.position;
+				rect.anchorMin			= os.anchorMin;
+				rect.anchorMax			= os.anchorMax;
+				rect.pivot				= os.pivot;
+				rect.sizeDelta			= os.sizeDelta;
+				rect.offsetMin			= os.offsetMin;
+				rect.offsetMax			= os.offsetMax;
+				rect.rotation			= os.rotation;
+				rect.localScale			= os.scale;
+				_target.gameObject.SetActive(os.activation);
+			}
+			else
+			{
+				var setting = SetSetting(PlatformType.Default);
+				rect.anchoredPosition	= setting.position;
+				rect.anchorMin			= setting.anchorMin;
+				rect.anchorMax			= setting.anchorMax;
+				rect.pivot				= setting.pivot;
+				rect.sizeDelta			= setting.sizeDelta;
+				rect.offsetMin			= setting.offsetMin;
+				rect.offsetMax			= setting.offsetMax;
+				rect.rotation			= setting.rotation;
+				rect.localScale			= setting.scale;
+				_target.gameObject.SetActive(setting.activation);
+			}
 		}
 
 	}

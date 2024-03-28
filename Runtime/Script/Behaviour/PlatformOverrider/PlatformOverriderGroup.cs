@@ -1,5 +1,5 @@
-using UnityEngine;
 using OriginalLib.Behaviour;
+using UnityEngine;
 
 namespace OriginalLib.Platform
 {
@@ -37,7 +37,7 @@ namespace OriginalLib.Platform
 		}
 
 
-#if UNITY_IOS || UNITY_ANDROID
+#if UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR
 		private DeviceOrientation old;
 #endif
 
@@ -54,23 +54,47 @@ namespace OriginalLib.Platform
 		private void Update()
 		{
 #if UNITY_EDITOR
-			if (UnityEditor.EditorWindow.focusedWindow != null)
-			{
-				string currentWindow = UnityEditor.EditorWindow.focusedWindow.titleContent.text;
-				bool isSimulator = currentWindow.Contains("Simulator");
+			var isSimulator = UnityEngine.SystemInfo.deviceModel != UnityEngine.Device.SystemInfo.deviceModel;
 
-				if (isSimulator)
+			if (isSimulator)
+			{
+				DeviceOrientation devop = DeviceOrientation.Unknown;
+				switch (UnityEngine.Device.Screen.orientation)
 				{
-					if (Screen.width < Screen.height)
+					case ScreenOrientation.Portrait:
+						devop = DeviceOrientation.Portrait;
+						break;
+					case ScreenOrientation.PortraitUpsideDown:
+						devop = DeviceOrientation.PortraitUpsideDown;
+						break;
+					case ScreenOrientation.LandscapeLeft:
+						devop = DeviceOrientation.LandscapeLeft;
+						break;
+					case ScreenOrientation.LandscapeRight:
+						devop = DeviceOrientation.LandscapeRight;
+						break;
+					default:
+						devop = DeviceOrientation.Unknown;
+						break;
+				}
+				if (devop != old && devop != DeviceOrientation.Unknown)
+				{
+					old = devop;
+					if (old == DeviceOrientation.Portrait ||
+						old == DeviceOrientation.PortraitUpsideDown)
 					{
 						_SelectTab = PlatformType.MobilePortrait;
+						isChange = true;
 					}
-					else
+					else if (old == DeviceOrientation.LandscapeLeft ||
+						old == DeviceOrientation.LandscapeRight)
 					{
 						_SelectTab = PlatformType.MobileLandscape;
+						isChange = true;
 					}
 				}
 			}
+
 #elif UNITY_IOS || UNITY_ANDROID
 			//モバイル端末の際のみ縦横判定を行う
 			//変更した際のみ更新を行う
@@ -104,16 +128,12 @@ namespace OriginalLib.Platform
 
 			foreach (PlatformOverrider po in POs)
 			{
-				Debug.Log(po.name);
 				po.SetRectTransform(_SelectTab);
 				po.isChange = true;
 			}
 			isChange = false;
-
-			
 		}
 #endif
-
 
 	}
 

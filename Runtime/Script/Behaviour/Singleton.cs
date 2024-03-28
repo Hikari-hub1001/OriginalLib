@@ -31,27 +31,35 @@ namespace OriginalLib.Behaviour
 
 		public static T Instance
 		{
-			private set;
-			get;
+			get
+			{
+				if (_instance == null)
+				{
+					_instance = FindObjectOfType<T>(true);
+				}
+				return _instance;
+			}
 		}
+
+		protected static T _instance;
 
 		/// <summary>
 		/// インスタンスが作成済みかチェックする
 		/// </summary>
 		/// <returns></returns>
-		public static bool IsValid() { return Instance != null; }
+		public static bool IsValid() { return _instance != null; }
 
 
 		protected void Awake()
 		{
 			if (Instance == null)
 			{
-				Instance = this.GetComponent<T>();
+				_instance = this.GetComponent<T>();
 				Init();
 			}
 			else if (Instance != this)
 			{
-				Debug.Log($"2個目のインスタンスが作成されました。破棄します。\r\n{this}");
+				Debug.Log($"The second instance has been created. It will be discarded.\r\n{this}");
 				Destroy(gameObject);
 			}
 		}
@@ -64,12 +72,14 @@ namespace OriginalLib.Behaviour
 		/// <summary>
 		/// オブジェクト破棄時にインスタンスも破棄する
 		/// </summary>
-		private void OnDestroy()
+		protected void OnDestroy()
 		{
 			if (Instance == this)
 			{
-				Instance = null;
+				_instance = null;
 			}
 		}
+
 	}
+
 }
