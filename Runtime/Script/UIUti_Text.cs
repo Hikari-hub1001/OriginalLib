@@ -51,7 +51,7 @@ namespace OriginalLib
 		/// <param name="pos">座標</param>
 		/// <param name="size">サイズ</param>
 		/// <returns>作成したオブジェクト</returns>
-		public static TextComponent reateText(string message, Vector3 pos, Vector2 size)
+		public static TextComponent CreateText(string message, Vector3 pos, Vector2 size)
 		{
 			return CreateText(message, pos, size, Color.black, true);
 		}
@@ -239,6 +239,23 @@ namespace OriginalLib
 			if (obj == null) { return; }
 			SetTextCol(obj, col);
 		}
+#if ENABLE_TMP
+		public static void SetTextFontmat(GameObject go, Material material)
+		{
+			if (go == null) { return; }
+			var text = go.GetComponent<TextComponent>();
+			if (text == null) { return; }
+			text.material = material;
+		}
+#elif !ENABLE_TMP
+		public static void SetTextFont(GameObject go, Font font)
+		{
+			if (go == null) { return; }
+			var text = go.GetComponent<TextComponent>();
+			if (text == null) { return; }
+			text.font = font;
+		}
+#endif
 	}
 
 	/// <summary>
@@ -250,5 +267,23 @@ namespace OriginalLib
 		{
 			UIUtil.SetText(go, message);
 		}
+
+		public static void SetTextCol(this GameObject go, Color color)
+		{
+			UIUtil.SetTextCol(go, color);
+		}
+
+#if ENABLE_TMP
+		public static void SetTextFontmat(this GameObject go, Material material)
+		{
+			UIUtil.SetTextFontmat(go, material);
+		}
+#elif !ENABLE_TMP
+		public static void SetTextFont(this GameObject go,Font font)
+		{
+			UIUtil.SetTextFont(go, font);
+		}
+#endif
+
 	}
 }

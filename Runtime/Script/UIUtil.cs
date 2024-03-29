@@ -23,6 +23,7 @@ namespace OriginalLib
 	{
 		/// <summary>
 		/// キャンバスの新規作成
+		/// ScreenSpace-Overlayで作成を行う
 		/// </summary>
 		/// <param name="canvasName">キャンバスオブジェクトの名称</param>
 		/// <returns>作成したキャンバス</returns>
@@ -39,12 +40,26 @@ namespace OriginalLib
 		/// <returns>作成したキャンバス</returns>
 		public static Canvas CreateCanvas(RenderMode mode, string canvasName = "Canvas")
 		{
+			return CreateCanvas(mode, null, canvasName);
+		}
+
+
+		/// <summary>
+		/// キャンバスの新規作成
+		/// </summary>
+		/// <param name="mode">レンダーモード</param>
+		/// <param name="canvasName">キャンバスオブジェクトの名称</param>
+		/// <param name="parent">親</param>
+		/// <returns>作成したキャンバス</returns>
+		public static Canvas CreateCanvas(RenderMode mode, Transform parent, string canvasName = "Canvas")
+		{
 			GameObject canvasObj = new GameObject();
 			Canvas canvas = canvasObj.AddComponent<Canvas>();
 			canvas.renderMode = mode;
 			canvasObj.AddComponent<CanvasScaler>();
 			canvasObj.AddComponent<GraphicRaycaster>();
 			canvasObj.name = canvasName;
+			canvasObj.transform.parent = parent;
 
 			return canvas;
 		}
@@ -146,9 +161,9 @@ namespace OriginalLib
 		{
 			UIUtil.Fade(canvasGroup.gameObject, alpha);
 		}
-		public static void Fade(this CanvasGroup canvasGroup, float alpha,float time)
+		public static void Fade(this CanvasGroup canvasGroup, float alpha, float time)
 		{
-			UIUtil.Fade(canvasGroup.gameObject, alpha,time);
+			UIUtil.Fade(canvasGroup.gameObject, alpha, time);
 		}
 	}
 
