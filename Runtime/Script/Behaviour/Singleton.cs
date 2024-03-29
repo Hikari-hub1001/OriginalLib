@@ -36,6 +36,7 @@ namespace OriginalLib.Behaviour
 				if (_instance == null)
 				{
 					_instance = FindObjectOfType<T>(true);
+					_instance?.Init();
 				}
 				return _instance;
 			}
@@ -52,7 +53,7 @@ namespace OriginalLib.Behaviour
 
 		protected void Awake()
 		{
-			if (Instance == null)
+			if (IsValid())
 			{
 				_instance = this.GetComponent<T>();
 				Init();
