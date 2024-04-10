@@ -316,7 +316,7 @@ namespace OriginalLib.Behaviour
 
 			if ((int)Align % 3 == 0) return;//左揃えはここで終了
 
-			rectTransform.sizeDelta = new(offset, maxHeight);
+			//rectTransform.sizeDelta = new(offset, maxHeight);
 
 			//最後に加算したスペースと画像サイズ分だけ取り消す
 			offset -= Spacing + ((RectTransform)_numberImageList[strNum.Length - 1].transform).sizeDelta.x;
