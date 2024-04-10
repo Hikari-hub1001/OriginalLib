@@ -6,21 +6,20 @@ namespace OriginalLib.Behaviour
 {
 	public class SpriteNumberInt : SpriteNumber<int>
 	{
+
+
 		protected override string CreateStrNum()
 		{
-			string format = "0";
+			string format = "D";
 			if (IntZeroFill)
 			{
-				for (int i = 1; i < IntFillDigit; i++)
-				{
-					format = "0" + format;
-				}
+				format += IntFillDigit;
 			}
 			return Value.ToString(format);
 		}
 
-
-		//少数点を設定するメソッドは隠す
+		//少数点に関連するものは隠す
+		private new Sprite PointSprite => null;
 		private new void SetSprite(Sprite point){ }
 
 		private new void SetSprite(Sprite zero, Sprite one, Sprite two,

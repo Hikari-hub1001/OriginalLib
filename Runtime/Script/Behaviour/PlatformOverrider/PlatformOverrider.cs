@@ -72,12 +72,15 @@ namespace OriginalLib.Platform
 #if UNITY_EDITOR || UNITY_PS4
 		[SerializeField, HideInInspector] private OverriderSettings PS4 = new(true);
 #endif
+#if (UNITY_EDITOR || UNITY_SWITCH) && false
+		[SerializeField, HideInInspector] private OverriderSettings SWITCH = new(true);
+#endif
 		private RectTransform rect;
 		#endregion
 
 		private void Start()
 		{
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
 
 			rect = GetComponent<RectTransform>();
 #elif UNITY_IOS || UNITY_ANDROID

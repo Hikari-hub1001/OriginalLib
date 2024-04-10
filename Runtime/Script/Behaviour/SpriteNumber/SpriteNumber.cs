@@ -234,7 +234,6 @@ namespace OriginalLib.Behaviour
 			//Image‚ğİ’è‚µ‚Ä‚¢‚­
 			for (int i = 0; i < strNum.Length; i++)
 			{
-				int n;
 				GameObject go;
 				Image img;
 				try
@@ -261,7 +260,7 @@ namespace OriginalLib.Behaviour
 					_numberImageList.Add(img);
 				}
 
-				if (int.TryParse(strNum.Substring(i, 1), out n))//”’l‚É•ÏŠ·‚Å‚«‚éê‡
+				if (int.TryParse(strNum.Substring(i, 1), out int n))//”’l‚É•ÏŠ·‚Å‚«‚éê‡
 				{
 					img.sprite = NumberSprites[n];
 					go.name = $"{OBJECT_DEFAULT_NAME}{Math.Pow(10, digit).ToString("e2")}_{strNum.Substring(i, 1)}";

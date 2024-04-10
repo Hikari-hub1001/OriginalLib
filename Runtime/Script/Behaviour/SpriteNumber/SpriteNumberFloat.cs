@@ -20,11 +20,19 @@ namespace OriginalLib.Behaviour
 				}
 			}
 
+			format += ".";
+			var s = Value.ToString().Split(".");
+
 			if (FloatZeroFill)
 			{
-				format += ".";
-
-				for (int i = 0; i < FloatFillDigits; i++)
+				for (int i = 1; i < FloatFillDigits; i++)
+				{
+					format += "0";
+				}
+			}
+			else if(s.Length > 1)
+			{
+				for (int i = 0; i < s[1].Length; i++)
 				{
 					format += "0";
 				}

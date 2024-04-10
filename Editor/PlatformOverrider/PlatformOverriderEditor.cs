@@ -17,12 +17,18 @@ namespace OriginalLib.Platform
 
 		private RectTransform rect;
 
+		private bool _isOptionOpen = false;
+		private PlatformType _copyFrom;
+		private PlatformType _copyTo;
+
 
 		private void Awake()
 		{
 			_target = target as PlatformOverrider;
 			rect = _target.GetComponent<RectTransform>();
 			os = SetSetting(pog.m_SelectTab);
+			OsFromRect();
+			_target.isChange = false;
 		}
 
 		/// <summary>
@@ -44,7 +50,7 @@ namespace OriginalLib.Platform
 				if (_target.isChange)
 				{
 					os = SetSetting(pog.m_SelectTab);
-					Rect2Os();
+					RectFromOs();
 					_target.isChange = false;
 				}
 
@@ -60,12 +66,12 @@ namespace OriginalLib.Platform
 					// 値が変更されたときの処理
 					pog.isChange = true;
 					os = SetSetting(pog.m_SelectTab);
-					Rect2Os();
+					RectFromOs();
 				}
 				else
 				{
 					os = SetSetting(pog.m_SelectTab);
-					Os2Rect();
+					OsFromRect();
 				}
 
 				EditorGUI.BeginChangeCheck();
@@ -78,15 +84,55 @@ namespace OriginalLib.Platform
 					{
 						pog.isChange = true;
 						os = SetSetting(PlatformType.Default);
-						Rect2Os();
+						RectFromOs();
 					}
 					else
 					{
 						pog.isChange = true;
 						os = SetSetting(pog.m_SelectTab);
-						Rect2Os();
+						RectFromOs();
 					}
 				}
+			}
+
+			_isOptionOpen = EditorGUILayout.Foldout(_isOptionOpen, "Option", true);
+
+			if (_isOptionOpen)
+			{
+				
+				EditorGUI.indentLevel++;
+				EditorGUILayout.LabelField("Copy======================================");
+				_copyFrom = (PlatformType)EditorGUILayout.EnumPopup("From", _copyFrom);
+				_copyTo = (PlatformType)EditorGUILayout.EnumPopup("To", _copyTo);
+
+				if (GUILayout.Button("Copy Platform"))
+				{
+					if (_copyFrom != _copyTo)
+					{
+						var from = SetSetting(_copyFrom);
+						var to = SetSetting(_copyTo);
+						to.position		= from.position;
+						to.anchorMin	= from.anchorMin;
+						to.anchorMax	= from.anchorMax;
+						to.pivot		= from.pivot;
+						to.sizeDelta	= from.sizeDelta;
+						to.offsetMin	= from.offsetMin;
+						to.offsetMax	= from.offsetMax;
+						to.rotation		= from.rotation;
+						to.scale		= from.scale;
+						to.activation	= from.activation;
+
+						if (pog.m_SelectTab == _copyTo)
+						{
+							pog.isChange = true;
+							os = SetSetting(pog.m_SelectTab);
+							RectFromOs();
+						}
+						Debug.Log($"Copy from {_copyFrom} to {_copyTo}");
+					}
+				}
+
+				EditorGUI.indentLevel--;
 			}
 
 			serializedObject.ApplyModifiedProperties();
@@ -103,67 +149,67 @@ namespace OriginalLib.Platform
 		/// <summary>
 		/// 設定値に今のRecttransformを保存
 		/// </summary>
-		void Os2Rect()
+		void OsFromRect()
 		{
 			if (!os.useDefault)
 			{
-				os.position		= rect.anchoredPosition;
-				os.anchorMin	= rect.anchorMin;
-				os.anchorMax	= rect.anchorMax;
-				os.pivot		= rect.pivot;
-				os.sizeDelta	= rect.sizeDelta;
-				os.offsetMin	= rect.offsetMin;
-				os.offsetMax	= rect.offsetMax;
-				os.rotation		= rect.rotation;
-				os.scale		= rect.localScale;
-				os.activation	= _target.gameObject.activeSelf;
+				os.position = rect.anchoredPosition;
+				os.anchorMin = rect.anchorMin;
+				os.anchorMax = rect.anchorMax;
+				os.pivot = rect.pivot;
+				os.sizeDelta = rect.sizeDelta;
+				os.offsetMin = rect.offsetMin;
+				os.offsetMax = rect.offsetMax;
+				os.rotation = rect.rotation;
+				os.scale = rect.localScale;
+				os.activation = _target.gameObject.activeSelf;
 			}
 			else
 			{
 				var setting = SetSetting(PlatformType.Default);
-				setting.position	= rect.anchoredPosition;
-				setting.anchorMin	= rect.anchorMin;
-				setting.anchorMax	= rect.anchorMax;
-				setting.pivot		= rect.pivot;
-				setting.sizeDelta	= rect.sizeDelta;
-				setting.offsetMin	= rect.offsetMin;
-				setting.offsetMax	= rect.offsetMax;
-				setting.rotation	= rect.rotation;
-				setting.scale		= rect.localScale;
-				setting.activation	= _target.gameObject.activeSelf;
+				setting.position = rect.anchoredPosition;
+				setting.anchorMin = rect.anchorMin;
+				setting.anchorMax = rect.anchorMax;
+				setting.pivot = rect.pivot;
+				setting.sizeDelta = rect.sizeDelta;
+				setting.offsetMin = rect.offsetMin;
+				setting.offsetMax = rect.offsetMax;
+				setting.rotation = rect.rotation;
+				setting.scale = rect.localScale;
+				setting.activation = _target.gameObject.activeSelf;
 			}
 		}
 
 		/// <summary>
 		/// 設定値をRecttransformに反映させる
 		/// </summary>
-		void Rect2Os()
+		void RectFromOs()
 		{
 			if (!os.useDefault)
 			{
-				rect.anchoredPosition	= os.position;
-				rect.anchorMin			= os.anchorMin;
-				rect.anchorMax			= os.anchorMax;
-				rect.pivot				= os.pivot;
-				rect.sizeDelta			= os.sizeDelta;
-				rect.offsetMin			= os.offsetMin;
-				rect.offsetMax			= os.offsetMax;
-				rect.rotation			= os.rotation;
-				rect.localScale			= os.scale;
+				rect.anchoredPosition = os.position;
+				rect.anchorMin = os.anchorMin;
+				rect.anchorMax = os.anchorMax;
+				rect.pivot = os.pivot;
+				rect.sizeDelta = os.sizeDelta;
+				rect.offsetMin = os.offsetMin;
+				rect.offsetMax = os.offsetMax;
+				rect.rotation = os.rotation;
+				rect.localScale = os.scale;
 				_target.gameObject.SetActive(os.activation);
 			}
 			else
 			{
 				var setting = SetSetting(PlatformType.Default);
-				rect.anchoredPosition	= setting.position;
-				rect.anchorMin			= setting.anchorMin;
-				rect.anchorMax			= setting.anchorMax;
-				rect.pivot				= setting.pivot;
-				rect.sizeDelta			= setting.sizeDelta;
-				rect.offsetMin			= setting.offsetMin;
-				rect.offsetMax			= setting.offsetMax;
-				rect.rotation			= setting.rotation;
-				rect.localScale			= setting.scale;
+				rect.anchoredPosition = setting.position;
+				rect.anchorMin = setting.anchorMin;
+				rect.anchorMax = setting.anchorMax;
+				rect.pivot = setting.pivot;
+				rect.sizeDelta = setting.sizeDelta;
+				rect.offsetMin = setting.offsetMin;
+				rect.offsetMax = setting.offsetMax;
+				rect.rotation = setting.rotation;
+				rect.localScale = setting.scale;
 				_target.gameObject.SetActive(setting.activation);
 			}
 		}
