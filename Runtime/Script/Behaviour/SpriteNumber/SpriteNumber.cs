@@ -12,7 +12,7 @@ namespace OriginalLib.Behaviour
 	[DisallowMultipleComponent]
 	public abstract class SpriteNumberBase : MonoBehaviour { }
 
-	[ExecuteAlways]
+
 	public abstract class SpriteNumber<T> : SpriteNumberBase
 	{
 		#region 変数
@@ -158,7 +158,6 @@ namespace OriginalLib.Behaviour
 		}
 		protected void Update()
 		{
-			//if (!Application.isPlaying) return;
 			if (EqualityComparer<T>.Default.Equals(Value, _oldValue)) return;
 			CreateImage(CreateStrNum());
 			_oldValue = Value;
@@ -487,18 +486,28 @@ namespace OriginalLib.Behaviour
 
 		private void Reset()
 		{
-			foreach (var item in _numberImageList)
+			for (int i = 0; i < transform.childCount;)
 			{
-				try
+				Transform child = transform.GetChild(i);
+				if (child.name.StartsWith(OBJECT_DEFAULT_NAME))
 				{
-					DestroyImmediate(item.gameObject);
+					DestroyImmediate(child.gameObject);
 				}
-				catch
+				else
 				{
-
+					i++;
 				}
 			}
+			OnValidate();
 		}
+
+		[ContextMenu("Remove Component", false)]
+		protected virtual void RemoveComponent()
+		{
+			Debug.Log("りむーーーーぶ！");
+		}
+
+
 #endif
 		#endregion
 	}

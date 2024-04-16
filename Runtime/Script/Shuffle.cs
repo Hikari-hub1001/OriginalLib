@@ -8,6 +8,7 @@
 //============================================================================================================================
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace OriginalLib
@@ -32,6 +33,7 @@ namespace OriginalLib
 		/// <returns>シャッフル後のリスト</returns>
 		public static List<T> Shuffle_Deel<T>(List<T> list, int cnt = 7)
 		{
+			if(list == null)throw new System.ArgumentNullException();
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
 
@@ -54,13 +56,14 @@ namespace OriginalLib
 			//リザルトに順番に積んでいく
 			while (0 < deckList.Count)
 			{
-				int index = Random.Range(0, deckList.Count);
+				int index = UnityEngine.Random.Range(0, deckList.Count);
 				result.AddRange(deckList[index]);
 				deckList.RemoveAt(index);
 			}
 
 			return result;
 		}
+		public static T[] Shuffle_Deel<T>(T[] array, int cnt = 7) { return Shuffle_Deel(array?.ToList(), cnt).ToArray(); }
 
 		/// <summary>
 		/// ランダムシャッフル
@@ -74,6 +77,7 @@ namespace OriginalLib
 		/// <returns>シャッフル後のリスト</returns>
 		public static List<T> Shuffle_Random<T>(List<T> list)
 		{
+			if (list == null) throw new System.ArgumentNullException();
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
 
@@ -81,13 +85,14 @@ namespace OriginalLib
 
 			while (0 < list.Count)
 			{
-				int index = Random.Range(0, list.Count);
+				int index = UnityEngine.Random.Range(0, list.Count);
 				result.Add(list[index]);
 				list.RemoveAt(index);
 			}
 
 			return result;
 		}
+		public static T[] Shuffle_Random<T>(T[] array) { return Shuffle_Random(array.ToList()).ToArray(); }
 
 		/// <summary>
 		/// カットシャッフル
@@ -103,14 +108,15 @@ namespace OriginalLib
 		/// <returns>シャッフル後のリスト</returns>
 		public static List<T> Shuffle_Cut<T>(List<T> list, int cnt = 20)
 		{
+			if (list == null) throw new System.ArgumentNullException();
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
 
 			for (int i = 0; i < cnt; i++)
 			{
 				//入れ替える任意の場所を乱数で取得
-				int index1 = Random.Range(0, list.Count);
-				int index2 = Random.Range(0, list.Count);
+				int index1 = UnityEngine.Random.Range(0, list.Count);
+				int index2 = UnityEngine.Random.Range(0, list.Count);
 				//index1番目は避難
 				T backUp = list[index1];
 				//index2番目をindex1番目に入れる
@@ -121,6 +127,7 @@ namespace OriginalLib
 
 			return list;
 		}
+		public static T[] Shuffle_Cut<T>(T[] array, int cnt = 20) { return Shuffle_Cut(array.ToList(), cnt).ToArray(); }
 
 		/// <summary>
 		/// ヒンドゥーシャッフル（トランプ等で良く行うシャッフル）
@@ -136,15 +143,16 @@ namespace OriginalLib
 		/// <returns>シャッフル後のリスト</returns>
 		public static List<T> Shuffle_Hindu<T>(List<T> list, int cnt = 10)
 		{
+			if (list == null) throw new System.ArgumentNullException();
 			//リスト配列が5未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 5) { return list; }
 
 			for (int i = 0; i < cnt; i++)
 			{
 				//1～リストの後ろから3番目で乱数取得
-				int index1 = Random.Range(1, list.Count - 3);
+				int index1 = UnityEngine.Random.Range(1, list.Count - 3);
 				//index+2～リスト-1の範囲で乱数取得
-				int index2 = Random.Range(index1 + 1, list.Count - 1);
+				int index2 = UnityEngine.Random.Range(index1 + 1, list.Count - 1);
 
 				//index1番目からindex2番目までの要素を避難
 				List<T> backUp = list.GetRange(index1, index2 - index1);
@@ -156,6 +164,7 @@ namespace OriginalLib
 
 			return list;
 		}
+		public static T[] Shuffle_Hindu<T>(T[] array, int cnt = 10) { return Shuffle_Hindu(array.ToList(), cnt).ToArray(); }
 
 		/// <summary>
 		/// ファローシャッフル
@@ -168,6 +177,7 @@ namespace OriginalLib
 		/// <returns>シャッフル後のリスト</returns>
 		public static List<T> Shuffle_Fallow<T>(List<T> list)
 		{
+			if (list == null) throw new System.ArgumentNullException();
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
 
@@ -181,7 +191,7 @@ namespace OriginalLib
 			while (true)
 			{
 				//どちらかのリストから1つ結果リストに移動
-				int index = Random.Range(0, 2);
+				int index = UnityEngine.Random.Range(0, 2);
 				result.Add(decks[index][0]);
 				decks[index].RemoveAt(0);
 
@@ -197,6 +207,7 @@ namespace OriginalLib
 
 			return result;
 		}
+		public static T[] Shuffle_Fallow<T>(T[] array) { return Shuffle_Fallow(array.ToList()).ToArray(); }
 	}
 
 	/// <summary>
@@ -224,5 +235,26 @@ namespace OriginalLib
 		{
 			return Shuffle.Shuffle_Hindu(list, cnt);
 		}
+		public static T[] Shuffle_Deel<T>(this T[] array, int cnt = 7)
+		{
+			return Shuffle.Shuffle_Deel(array, cnt);
+		}
+		public static T[] Shuffle_Cut<T>(this T[] array, int cnt = 20)
+		{
+			return Shuffle.Shuffle_Cut(array, cnt);
+		}
+		public static T[] Shuffle_Fallow<T>(this T[] array)
+		{
+			return Shuffle.Shuffle_Fallow(array);
+		}
+		public static T[] Shuffle_Random<T>(this T[] array)
+		{
+			return Shuffle.Shuffle_Random(array);
+		}
+		public static T[] Shuffle_Hindu<T>(this T[] array, int cnt = 10)
+		{
+			return Shuffle.Shuffle_Hindu(array, cnt);
+		}
+
 	}
 }

@@ -25,7 +25,7 @@ namespace OriginalLib.Behaviour
 
 			if (FloatZeroFill)
 			{
-				for (int i = 1; i < FloatFillDigits; i++)
+				for (int i = 0; i < FloatFillDigits; i++)
 				{
 					format += "0";
 				}
