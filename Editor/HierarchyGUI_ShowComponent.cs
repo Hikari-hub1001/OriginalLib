@@ -13,7 +13,7 @@ public static class HierarchyGUI_ShowComponent
 	{
 
 		IconShow = Convert.ToBoolean(EditorUserSettings.GetConfigValue("ComponentIcon"));
-		UnityEditor.EditorApplication.delayCall +=
+		EditorApplication.delayCall +=
 			() =>
 			{
 				Menu.SetChecked("OriginalLib/ComponentIcon", IconShow);
@@ -48,13 +48,14 @@ public static class HierarchyGUI_ShowComponent
 		{
 			// コンポーネントのアイコン画像を取得
 			var texture2D = AssetPreview.GetMiniThumbnail(component);
-			if (texture2D == null) continue;
+			//if (texture2D == null) continue;
+			if (texture2D != null)
+			{
+				GUI.DrawTexture(selectionRect, texture2D);
+				selectionRect.x += ICON_SIZE;
+			}
 
-			GUI.DrawTexture(selectionRect, texture2D);
-			selectionRect.x += ICON_SIZE;
-
-
-			if (HasMissingReference(component))
+			if (component == null || HasMissingReference(component))
 			{
 				Texture warningIcon = EditorGUIUtility.IconContent("console.warnicon").image;
 				GUI.DrawTexture(selectionRect, warningIcon);
@@ -95,5 +96,6 @@ public static class HierarchyGUI_ShowComponent
 		EditorUserSettings.SetConfigValue("ComponentIcon", IconShow.ToString());
 	}
 
+	
 
 }
