@@ -1,7 +1,6 @@
-using OriginalLib.Behaviour;
 using UnityEngine;
 
-namespace OriginalLib.Platform
+namespace OriginalLib.Behaviour.Platform
 {
 
 	public enum PlatformType
@@ -124,8 +123,11 @@ namespace OriginalLib.Platform
 			if (!isChange) return;
 
 			//PO�̎擾
+#if UNITY_6000
+			PlatformOverrider[] POs = FindObjectsByType<PlatformOverrider>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+#else
 			PlatformOverrider[] POs = FindObjectsOfType<PlatformOverrider>(true);
-
+#endif
 			foreach (PlatformOverrider po in POs)
 			{
 				po.SetRectTransform(_SelectTab);
