@@ -35,7 +35,11 @@ namespace OriginalLib.Behaviour
 			{
 				if (_instance == null)
 				{
+#if UNITY_6000
+					_instance = FindAnyObjectByType<T>(FindObjectsInactive.Include);
+#else
 					_instance = FindObjectOfType<T>(true);
+#endif
 					_instance?.Init();
 				}
 				return _instance;
@@ -43,6 +47,7 @@ namespace OriginalLib.Behaviour
 		}
 
 		protected static T _instance;
+
 
 		/// <summary>
 		/// インスタンスが作成済みかチェックする
@@ -53,7 +58,7 @@ namespace OriginalLib.Behaviour
 
 		protected void Awake()
 		{
-			if (IsValid())
+			if (!IsValid())
 			{
 				_instance = this.GetComponent<T>();
 				Init();
@@ -61,7 +66,15 @@ namespace OriginalLib.Behaviour
 			else if (Instance != this)
 			{
 				Debug.Log($"The second instance has been created. It will be discarded.\r\n{this}");
-				Destroy(gameObject);
+				if (Application.isPlaying)
+				{
+					Destroy(gameObject);
+				}
+				else
+				{
+					Debug.Log($"{this.gameObject.name} : {this}");
+					DestroyImmediate(gameObject);
+				}
 			}
 		}
 
@@ -80,6 +93,7 @@ namespace OriginalLib.Behaviour
 				_instance = null;
 			}
 		}
+
 
 	}
 
