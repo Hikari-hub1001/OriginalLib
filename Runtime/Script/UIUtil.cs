@@ -15,8 +15,9 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+#if DOTWEEN
 using DG.Tweening;
-
+#endif
 namespace OriginalLib
 {
 	public partial class UIUtil

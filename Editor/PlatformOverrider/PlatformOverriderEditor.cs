@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace OriginalLib.Platform
+namespace OriginalLib.Behaviour.Platform
 {
 	[ExecuteInEditMode]
 	[CustomEditor(typeof(PlatformOverrider))]//拡張するクラスを指定

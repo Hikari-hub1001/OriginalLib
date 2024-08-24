@@ -1,10 +1,11 @@
 {
     "name": "OriginalLib",
-    "rootNamespace": "",
+    "rootNamespace": "OriginalLib",
     "references": [
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Tests",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "DOTweenPro.Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
