@@ -57,7 +57,11 @@ namespace OriginalLib
 		/// <returns>コンポーネントを持ったオブジェクト<	/returns>
 		public static Component FindComponent(System.Type type)
 		{
+#if UNITY_6000
+			Object o = Object.FindFirstObjectByType(type);
+#else
 			Object o = Object.FindObjectOfType(type);
+#endif
 			if (o == null) return null;
 			return o as Component;
 		}
@@ -81,7 +85,12 @@ namespace OriginalLib
 		/// <param name="includeInactive">非活性のオブジェクトに実行するか（基本は実行する）</param>
 		public static void TraversalAction<T>(System.Action<T> action, bool includeInactive = true) where T : Component
 		{
+#if UNITY_6000
+			FindObjectsInactive inactive = includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude;
+			var objects = GameObject.FindObjectsByType<T>(inactive, FindObjectsSortMode.None);
+#else
 			var objects = GameObject.FindObjectsOfType<T>(includeInactive);
+#endif
 			foreach (var obj in objects)
 			{
 				if (!(obj.gameObject.activeSelf && includeInactive)) continue;

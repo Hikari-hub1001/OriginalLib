@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace OriginalLib
 {
-	public class DOTweenSupport
+	internal class DOTweenSupport
 	{
 		internal static DOTweenSupport I
 		{
@@ -16,7 +16,7 @@ namespace OriginalLib
 		}
 		private static DOTweenSupport _i;
 
-		public DOTweenSupport OnComplete(Action complete)
+		internal DOTweenSupport OnComplete(Action complete)
 		{
 			return Main();
 		}
@@ -32,9 +32,9 @@ namespace OriginalLib
 		}
 	}
 
-	public static class DOTweenSupport_Ex
+	internal static class DOTweenSupport_Ex
 	{
-		public static DOTweenSupport DOFade(this CanvasGroup canvasGroup, float target, float time)
+		internal static DOTweenSupport DOFade(this CanvasGroup canvasGroup, float target, float time)
 		{
 			return DOTweenSupport.Main();
 		}

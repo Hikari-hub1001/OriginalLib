@@ -40,7 +40,11 @@ namespace OriginalLib.Behaviour
 #else
 					_instance = FindObjectOfType<T>(true);
 #endif
-					_instance?.Init();
+					if(_instance == null)
+					{
+						throw new System.NullReferenceException("Attached object not found");
+					}
+					_instance.Init();
 				}
 				return _instance;
 			}

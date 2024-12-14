@@ -5,7 +5,8 @@
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Tests",
         "DOTween.Modules",
-        "DOTweenPro.Scripts"
+        "DOTweenPro.Scripts",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,7 +19,12 @@
         {
             "name": "com.unity.textmeshpro",
             "expression": "",
-            "define": "ENABLE_TMP"
+            "define": "AVAILABLE_TMP"
+        },
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "",
+            "define": "AVAILABLE_INPUT_SYSTEM"
         }
     ],
     "noEngineReferences": false
