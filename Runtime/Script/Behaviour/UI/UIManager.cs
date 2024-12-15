@@ -23,6 +23,11 @@ namespace OriginalLib.Behaviour
 
 		protected override void Init()
 		{
+			UIContainer = new GameObject("UIContainer");
+			UIContainer.SetActive(false);
+			UIContainer.transform.SetParent(transform);
+
+
 			foreach (var ui in uiPrefabList)
 			{
 				CustomUI o;
@@ -58,9 +63,6 @@ namespace OriginalLib.Behaviour
 				}
 			}
 
-			UIContainer = new GameObject("UIContainer");
-			UIContainer.SetActive(false);
-			UIContainer.transform.SetParent(transform);
 		}
 
 		public T GetUI<T>() where T : CustomUI
