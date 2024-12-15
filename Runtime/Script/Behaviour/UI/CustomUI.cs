@@ -30,6 +30,8 @@ namespace OriginalLib.Behaviour
 
 		private UIManager uiManager => UIManager.Instance;
 
+		private Coroutine fadingTween;
+
 #if AVAILABLE_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
 
 		public event Action<InputAction.CallbackContext> Perform;
@@ -63,21 +65,41 @@ namespace OriginalLib.Behaviour
 
 		public virtual void Show()
 		{
+			if (fadingTween != null)
+			{
+				StopCoroutine(fadingTween);
+			}
+
 			float alpha = canvasGroup.alpha;
 			canvasGroup.interactable = true;
 			canvasGroup.blocksRaycasts = true;
 			transform.SetParent(uiManager.transform);
-			StartCoroutine(TweenFloat(alpha, 1.0f, fadeTime, (f) => canvasGroup.alpha = f, () => OnShowComplete?.Invoke()));
+			fadingTween = StartCoroutine(
+					TweenFloat(
+						alpha,
+						1.0f,
+						fadeTime,
+						(f) => canvasGroup.alpha = f,
+						() =>
+						{
+							OnShowComplete?.Invoke();
+							fadingTween = null;
+						}));
 
 			//UIManager.Instance.ShowUI.Add(gameObject.name);
 		}
 
 		public virtual void Hide()
 		{
+			if(fadingTween != null)
+			{
+				StopCoroutine(fadingTween);
+			}
+
 			float alpha = canvasGroup.alpha;
 			canvasGroup.interactable = false;
 			canvasGroup.blocksRaycasts = false;
-			StartCoroutine(
+			fadingTween = StartCoroutine(
 				TweenFloat(
 					alpha,
 					0.0f,
@@ -85,9 +107,9 @@ namespace OriginalLib.Behaviour
 					(f) => canvasGroup.alpha = f,
 					() =>
 					{
+						transform.SetParent(uiManager.UIContainer.transform);
 						OnHideComplete?.Invoke();
-						transform.SetParent(uiManager.UIContainer.transform);
-						transform.SetParent(uiManager.UIContainer.transform);
+						fadingTween = null;
 					}));
 
 			//UIManager.Instance.ShowUI.Remove(gameObject.name);
