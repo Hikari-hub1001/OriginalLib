@@ -42,6 +42,7 @@ namespace OriginalLib.Behaviour
 
 				uiInstanceList.Add(o);
 				//DontDestroyOnLoad(o);
+				o.gameObject.SetActive(true);
 
 				if (useUICamera)
 				{
