@@ -1,16 +1,18 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 #if AVAILABLE_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 #endif
 
 namespace OriginalLib.Behaviour
 {
 	[RequireComponent(typeof(CanvasGroup))]
 	[RequireComponent(typeof(Canvas))]
+	[RequireComponent(typeof(CanvasScaler))]
+	[RequireComponent(typeof(GraphicRaycaster))]
 	public class CustomUI : MonoBehaviour
 	{
 		[SerializeField]
@@ -91,7 +93,7 @@ namespace OriginalLib.Behaviour
 
 		public virtual void Hide()
 		{
-			if(fadingTween != null)
+			if (fadingTween != null)
 			{
 				StopCoroutine(fadingTween);
 			}
