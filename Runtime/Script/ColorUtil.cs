@@ -23,6 +23,18 @@ namespace OriginalLib
 		}
 
 		/// <summary>
+		/// 0~255でカラーを構築
+		/// </summary>
+		/// <param name="r">Red</param>
+		/// <param name="g">Green</param>
+		/// <param name="b">Blue</param>
+		/// <returns>Color構造体</returns>
+		public static Color IntToColor(int r, int g, int b)
+		{
+			return IntToColor(r,g,b,255);
+		}
+
+		/// <summary>
 		/// グレースケール化
 		/// </summary>
 		/// <param name="original">通常カラー</param>
