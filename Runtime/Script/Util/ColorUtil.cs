@@ -41,7 +41,7 @@ namespace OriginalLib
 		/// <returns>グレースケール化したカラー</returns>
 		public static Color GlayScale(Color original)
 		{
-			float gray = original.r * 0.3f + original.g * 0.59f + original.b * 0.11f;
+			float gray = original.grayscale;
 			return new Color(gray, gray, gray, original.a);
 		}
 

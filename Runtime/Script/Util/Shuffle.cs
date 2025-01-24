@@ -9,7 +9,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace OriginalLib
 {
@@ -33,7 +32,7 @@ namespace OriginalLib
 		/// <returns>シャッフル後のリスト</returns>
 		public static List<T> Shuffle_Deel<T>(List<T> list, int cnt = 7)
 		{
-			if(list == null)throw new System.ArgumentNullException();
+			if (list == null) throw new System.ArgumentNullException();
 			//リスト配列が3未満の場合はシャッフルできないためキャンセル
 			if (list.Count < 3) { return list; }
 

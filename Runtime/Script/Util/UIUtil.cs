@@ -2,7 +2,6 @@
 //
 // このクラスはUIに関係するメソッドを用意しています。
 // このファイルではUI全般に共通して使用できる関数を用意しています。
-// またDotweenを使用した処理もありますので、Dotweenを各自インストールをお願いします。
 //
 // 関係のあるファイル
 // ・UIUti_Image.cs
@@ -13,10 +12,11 @@
 //
 //============================================================================================================================
 
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 #if DOTWEEN
-using DG.Tweening;
+//using DG.Tweening;
 #endif
 namespace OriginalLib
 {
@@ -69,9 +69,9 @@ namespace OriginalLib
 		/// 子要素ごとUIをフェードアウトさせる
 		/// </summary>
 		/// <param name="go">フェードアウトさせるUI</param>
-		public static void FadeOut(GameObject go)
+		public static async Task FadeOut(GameObject go)
 		{
-			FadeOut(go, 1.0f);
+			await FadeOut(go, 1.0f);
 		}
 
 		/// <summary>
@@ -79,18 +79,18 @@ namespace OriginalLib
 		/// </summary>
 		/// <param name="go">フェードアウトさせるUI</param>
 		/// <param name="time">フェードさせる時間</param>
-		public static void FadeOut(GameObject go, float time)
+		public static async Task FadeOut(GameObject go, float time)
 		{
-			Fade(go, 0.0f, time);
+			await Fade(go, 0.0f, time);
 		}
 
 		/// <summary>
 		/// 子要素ごとUIをフェードインさせる
 		/// </summary>
 		/// <param name="go">フェードアウトさせるUI</param>
-		public static void FadeIn(GameObject go)
+		public static async Task FadeIn(GameObject go)
 		{
-			FadeIn(go, 1.0f);
+			await FadeIn(go, 1.0f);
 		}
 
 		/// <summary>
@@ -98,9 +98,9 @@ namespace OriginalLib
 		/// </summary>
 		/// <param name="go">フェードアウトさせるUI</param>
 		/// <param name="time">フェードさせる時間</param>
-		public static void FadeIn(GameObject go, float time)
+		public static async Task FadeIn(GameObject go, float time)
 		{
-			Fade(go, 1.0f, time);
+			await Fade(go, 1.0f, time);
 		}
 
 		/// <summary>
@@ -109,15 +109,21 @@ namespace OriginalLib
 		/// <param name="go">フェードアウトさせるUI</param>
 		/// <param name="alpha">目標のアルファ</param>
 		/// <param name="time">フェードさせる時間</param>
-		public static void Fade(GameObject go, float alpha, float time)
+		public static async Task Fade(GameObject go, float alpha, float time)
 		{
 			var group = go.GetComponent<CanvasGroup>();
-			if (group == null) go.AddComponent<CanvasGroup>();
-			group.DOFade(alpha, time)
-				.OnComplete(() =>
-				{
-					go.SetActive(false);
-				});
+			if (group == null) group = go.AddComponent<CanvasGroup>();
+
+			float timePer = (alpha - group.alpha) / time;
+
+			float elapsedTime = 0.0f;
+
+			while (elapsedTime < time)
+			{
+				group.alpha += timePer * Time.deltaTime;
+				elapsedTime += Time.deltaTime;
+				await Task.Yield();
+			}
 		}
 
 		/// <summary>
@@ -125,15 +131,9 @@ namespace OriginalLib
 		/// </summary>
 		/// <param name="go">フェードアウトさせるUI</param>
 		/// <param name="alpha">目標のアルファ</param>
-		public static void Fade(GameObject go, float alpha)
+		public static async Task Fade(GameObject go, float alpha)
 		{
-			var group = go.GetComponent<CanvasGroup>();
-			if (group == null) go.AddComponent<CanvasGroup>();
-			group.DOFade(alpha, 1.0f)
-				.OnComplete(() =>
-				{
-					go.SetActive(false);
-				});
+			await Fade(go, alpha, 1.0f);
 		}
 	}
 
@@ -142,29 +142,29 @@ namespace OriginalLib
 	/// </summary>
 	public static partial class UIUtil_Ex
 	{
-		public static void FadeIn(this CanvasGroup canvasGroup)
+		public static async Task FadeIn(this CanvasGroup canvasGroup)
 		{
-			UIUtil.FadeIn(canvasGroup.gameObject);
+			await UIUtil.FadeIn(canvasGroup.gameObject);
 		}
-		public static void FadeIn(this CanvasGroup canvasGroup, float time)
+		public static async void FadeIn(this CanvasGroup canvasGroup, float time)
 		{
-			UIUtil.FadeIn(canvasGroup.gameObject, time);
+			await UIUtil.FadeIn(canvasGroup.gameObject, time);
 		}
-		public static void FadeOut(this CanvasGroup canvasGroup)
+		public static async Task FadeOut(this CanvasGroup canvasGroup)
 		{
-			UIUtil.FadeOut(canvasGroup.gameObject);
+			await UIUtil.FadeOut(canvasGroup.gameObject);
 		}
-		public static void FadeOut(this CanvasGroup canvasGroup, float time)
+		public static async Task FadeOut(this CanvasGroup canvasGroup, float time)
 		{
-			UIUtil.FadeOut(canvasGroup.gameObject, time);
+			await UIUtil.FadeOut(canvasGroup.gameObject, time);
 		}
-		public static void Fade(this CanvasGroup canvasGroup, float alpha)
+		public static async Task Fade(this CanvasGroup canvasGroup, float alpha)
 		{
-			UIUtil.Fade(canvasGroup.gameObject, alpha);
+			await UIUtil.Fade(canvasGroup.gameObject, alpha);
 		}
-		public static void Fade(this CanvasGroup canvasGroup, float alpha, float time)
+		public static async Task Fade(this CanvasGroup canvasGroup, float alpha, float time)
 		{
-			UIUtil.Fade(canvasGroup.gameObject, alpha, time);
+			await UIUtil.Fade(canvasGroup.gameObject, alpha, time);
 		}
 	}
 
