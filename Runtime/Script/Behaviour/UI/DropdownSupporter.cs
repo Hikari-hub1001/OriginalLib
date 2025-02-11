@@ -1,9 +1,9 @@
 using System;
-using UnityEngine.UI;
+using TMPro;
 
 namespace OriginalLib.Behaviour
 {
-	public class DropdownSupporter : SelectableSupporter<Dropdown>
+	public class DropdownSupporter : SelectableSupporter<TMP_Dropdown>
 	{
 		public event Action<int> OnDropdownValueChanged;
 
