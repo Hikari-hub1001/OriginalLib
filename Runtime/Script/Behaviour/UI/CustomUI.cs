@@ -167,7 +167,10 @@ namespace OriginalLib.Behaviour
 			}
 			else
 			{
-				Hide();
+				canvasGroup.alpha = 0.0f;
+				canvasGroup.interactable = false;
+				canvasGroup.blocksRaycasts = false;
+				transform.SetParent(uiManager.UIContainer.transform);
 			}
 		}
 #if AVAILABLE_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
