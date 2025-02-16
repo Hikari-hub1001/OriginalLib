@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.Events;
 #if AVAILABLE_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 #endif
+using UnityEngine.UI;
 
 namespace OriginalLib.Behaviour
 {
