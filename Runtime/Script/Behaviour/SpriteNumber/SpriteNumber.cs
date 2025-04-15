@@ -1,514 +1,344 @@
+ï»¿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
-using System.Numerics;
 
 namespace OriginalLib.Behaviour
 {
-	/// <summary>
-	/// d•¡ƒAƒ^ƒbƒ`–h~—pƒNƒ‰ƒX
-	/// </summary>
-	[DisallowMultipleComponent]
-	public abstract class SpriteNumberBase : MonoBehaviour { }
-
-
-	public abstract class SpriteNumber<T> : SpriteNumberBase
+	[RequireComponent(typeof(CanvasRenderer))]
+	public abstract class SpriteNumber<T> : MaskableGraphic
 	{
-		#region •Ï”
+		public override Texture mainTexture => NumberAtlas?.GetAtlas() ?? s_WhiteTexture;
+
+		public SpriteNumberAtlasSO NumberAtlas;
+
+		[Tooltip("ã“ã®Graphicã®é«˜ã•ã‚’æ±ºã‚ã‚‹å€¤ï¼ˆå¹…ã¯ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã«åˆã‚ã›ã¦è‡ªå‹•ç®—å‡ºï¼‰")]
+		public float preferredHeight = 100f;
+		[Tooltip("ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆåŒå£«ã®é–“éš”ï¼ˆpxå˜ä½ãƒ»é«˜ã•ã‚¹ã‚±ãƒ¼ãƒ«ã«åŸºã¥ãï¼‰")]
 		/// <summary>
-		/// ”’l•\¦‚Ég—p‚·‚éImageƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒg
+		/// æ•°å­—é–“ã®è·é›¢
 		/// </summary>
-		[SerializeField, HideInInspector]
-		protected List<Image> _numberImageList = new();
+		public float Spacing = 0.0f;
 
 		[SerializeField] protected T Value;
 		protected T _oldValue;
 
 		/// <summary>
-		/// ”’l‚ÌƒXƒvƒ‰ƒCƒg‚Ì”z—ñ
-		/// —v‘f”‚Í0~9‚Ì10ŒÂ‚ÅŒÅ’è
+		/// æ•´æ•°éƒ¨ã®0åŸ‹ã‚
 		/// </summary>
-		[SerializeField] protected Sprite _zero;
-		[SerializeField] protected Sprite _one;
-		[SerializeField] protected Sprite _two;
-		[SerializeField] protected Sprite _three;
-		[SerializeField] protected Sprite _four;
-		[SerializeField] protected Sprite _five;
-		[SerializeField] protected Sprite _six;
-		[SerializeField] protected Sprite _seven;
-		[SerializeField] protected Sprite _eight;
-		[SerializeField] protected Sprite _nine;
-		public Sprite[] NumberSprites
-		{
-			get
-			{
-				return new Sprite[] {
-					_zero,
-					_one,
-					_two,
-					_three,
-					_four,
-					_five,
-					_six,
-					_seven,
-					_eight,
-					_nine
-				};
-			}
-		}
-		/// <summary>
-		/// ƒ}ƒCƒiƒX•„†‚ğ•\‚·Sprite
-		/// </summary>
-		[SerializeField] protected Sprite _minusSprite;
-		public Sprite MinusSprite => _minusSprite;
-		/// <summary>
-		/// ƒvƒ‰ƒX•„†‚ğ•\‚·Sprite
-		/// </summary>
-		[SerializeField] protected Sprite _plusSprite;
-		public Sprite PlusSprite => _plusSprite;
+		public bool PadIntegerPart = false;
 
 		/// <summary>
-		/// ­”“_‚ğ•\‚·Sprite
-		/// </summary>
-		[SerializeField] protected Sprite _pointSprite;
-		public Sprite PointSprite => _pointSprite;
-
-		/// <summary>
-		/// ®”•”‚Ì0–„‚ß
-		/// </summary>
-		public bool IntZeroFill = false;
-
-		/// <summary>
-		/// ®”•”‚Ì0–„‚ßŒ…”
-		/// ƒfƒtƒHƒ‹ƒg‚Í4Œ…
-		/// Å‘å‚Íint‚ÌÅ‘åŒ…”‚É€‹’
+		/// æ•´æ•°éƒ¨ã®0åŸ‹ã‚æ¡æ•°
+		/// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯4æ¡
+		/// æœ€å¤§ã¯intã®æœ€å¤§æ¡æ•°ã«æº–æ‹ 
 		/// </summary>
 		[Range(1, 10)]
-		public uint IntFillDigit = 4;
+		public uint IntegerPartDigits = 4;
 
 		/// <summary>
-		/// ­”•”‚Ì0–„‚ß
+		/// å°‘æ•°éƒ¨ã®0åŸ‹ã‚
 		/// </summary>
-		public bool FloatZeroFill = true;
+		public bool PadDecimalPart = false;
 
 		/// <summary>
-		/// ­”•\¦‚ÌÛ‚Ég—p‚·‚é—LŒøŒ…”
-		/// ƒfƒtƒHƒ‹ƒg‚Í2Œ…	
+		/// å°‘æ•°è¡¨ç¤ºã®éš›ã«ä½¿ç”¨ã™ã‚‹æœ‰åŠ¹æ¡æ•°
+		/// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯2æ¡	
 		/// </summary>
 		[Range(0, 5)]
-		public uint FloatFillDigits = 2;
+		public uint DecimalPartDigits = 2;
 
 		/// <summary>
-		/// •„†•t‚«
+		/// ç¬¦å·ä»˜ã
 		/// </summary>
-		public Sign UseSign = Sign.MinusOnly;
+		public Sign SignMode = Sign.MinusOnly;
 
 		public enum Sign
 		{
 			NoSign,
 			PlusOnly,
 			MinusOnly,
-			PlusAndMinus,
+			Both,
 		}
 
-		/// <summary>
-		/// ”’l•\¦‚Ég‚¤ƒIƒuƒWƒFƒNƒg‚ÌƒvƒŒƒtƒ@ƒu
-		/// </summary>
-		//public GameObject NumberPrefab;
+		public bool GroupDigits = true;
 
-		public enum NumberAlign
+		private DrivenRectTransformTracker tracker = new();
+
+		protected override void OnPopulateMesh(VertexHelper vh)
 		{
-			UpperLeft = 6,
-			UpperCenter = 7,
-			UpperRight = 8,
-			MiddleLeft = 3,
-			MiddleCenter = 4,
-			MiddleRight = 5,
-			LowerLeft = 0,
-			LowerCenter = 1,
-			LowerRight = 2,
-		}
-		/// <summary>
-		/// Šî€‚Æ‚·‚éˆÊ’u
-		/// </summary>
-		public NumberAlign Align = NumberAlign.MiddleCenter;
+			vh.Clear();
+			if (NumberAtlas == null || NumberAtlas.GetAtlas() == null || NumberAtlas.uvs == null) return;
 
-		/// <summary>
-		/// ”šŠÔ‚Ì‹——£
-		/// </summary>
-		public float Spacing = 0.0f;
+			float height = preferredHeight;
+			float atlasRatio = NumberAtlas.GetAtlas().width / (float)NumberAtlas.GetAtlas().height;
 
-		/// <summary>
-		/// ƒIƒuƒWƒFƒNƒg–¼‚ÌƒfƒtƒHƒ‹ƒg•”•ª
-		/// </summary>
-		private readonly string OBJECT_DEFAULT_NAME = "NumberSprite_";
+			// å„ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã®å¹…ã‚’è¨ˆç®—ã—ãªãŒã‚‰ã€åˆè¨ˆå¹…ï¼‹ã‚¹ãƒšãƒ¼ã‚¹ã‚‚è¨ˆç®—
+			List<float> spriteWidths = new();
+			float totalWidth = 0f;
 
-		private RectTransform rectTransform;
-		#endregion
+			string numberStr = FormatNumber();
 
-		#region MonoBehaviourŠÖ”
-		protected void Awake()
-		{
-			rectTransform = GetComponent<RectTransform>();
-		}
-		protected void OnEnable()
-		{
-			CreateImage(CreateStrNum());
-		}
-		protected void Update()
-		{
-			if (EqualityComparer<T>.Default.Equals(Value, _oldValue)) return;
-			CreateImage(CreateStrNum());
-			_oldValue = Value;
-		}
-		private void OnDestroy()
-		{
-			foreach (var item in _numberImageList)
+			foreach (char c in numberStr)
 			{
-				try
-				{
-					if (Application.isPlaying)
-					{
-						Destroy(item.gameObject);
-					}
-					else
-					{
-						DestroyImmediate(item.gameObject);
-					}
-				}
-				catch { }
-			}
-		}
-		#endregion
-
-		#region SpriteNumber—pŠÖ”
-		protected abstract string CreateStrNum();
-		protected void CreateImage(string strNum)
-		{
-			//À•Wİ’è—p
-			float offset = 0;
-			int digit = CalcDigit(strNum) - 1;
-			float maxHeight = 0;
-			if (UseSign == Sign.NoSign)
-			{
-				var first = strNum.Substring(0, 1);
-				if (first == "-" || first == "+")
-				{
-					strNum = strNum.Substring(1, strNum.Length - 1);
-				}
-			}
-			else if (UseSign == Sign.PlusOnly)
-			{
-				var first = strNum.Substring(0, 1);
-				if (first == "-")
-				{
-					strNum = strNum.Substring(1, strNum.Length - 1);
-				}
-				else if (first != "+")
-				{
-					strNum = "+" + strNum;
-				}
-			}
-			else if (UseSign == Sign.MinusOnly)
-			{
-				var first = strNum.Substring(0, 1);
-				if (first == "+")
-				{
-					strNum = strNum.Substring(1, strNum.Length - 1);
-				}
-			}
-			else if (UseSign == Sign.PlusAndMinus)
-			{
-				var first = strNum.Substring(0, 1);
-				if (first != "+" && first != "-")
-				{
-					strNum = "+" + strNum;
-				}
+				var index = GetIndexForChar(c);
+				if (index < 0 || index >= NumberAtlas.uvs.Length) continue;
+				var uv = NumberAtlas.uvs[index];
+				float width = uv.width * height * atlasRatio;
+				spriteWidths.Add(width);
+				totalWidth += width;
 			}
 
-			//Null‚É‚È‚Á‚Ä‚µ‚Ü‚Á‚½—v‘f‚ÍÁ‚·
-			_numberImageList.RemoveAll((o) => o == null);
+			// ã‚¹ãƒšãƒ¼ã‚¹è¿½åŠ ï¼ˆã‚¹ãƒ—ãƒ©ã‚¤ãƒˆãŒ2å€‹ä»¥ä¸Šã‚ã‚Œã°é–“ã« spacing * (count - 1) å…¥ã‚‹ï¼‰
+			if (spriteWidths.Count > 1)
+				totalWidth += Spacing * (spriteWidths.Count - 1);
 
-			//Image‚ğİ’è‚µ‚Ä‚¢‚­
-			for (int i = 0; i < strNum.Length; i++)
+			float offsetX = 0f;
+			Vector2 pivotOffset = new Vector2(-rectTransform.pivot.x * rectTransform.sizeDelta.x, -rectTransform.pivot.y * preferredHeight);
+
+			foreach (char c in numberStr)
 			{
-				GameObject go;
-				Image img;
-				try
-				{
-					//Šù‚Éì‚ç‚ê‚Ä‚¢‚½‚çæ“¾‚·‚é
-					img = _numberImageList[i];//Argment‚ª”­¶‰Â”\«
-					go = _numberImageList[i].gameObject;//Missing,Null‚ª”­¶‰Â”\«
-					go.SetActive(true);
-				}
-				catch (Exception ex) when (ex is ArgumentException)
-				{
-					//Argment->Œ…‚ª‘‚¦‚½‚Æ‚«
-					//Missing,Null->“r’†‚ÅŒ…ƒIƒuƒWƒFƒNƒg‚ªíœ‚³‚ê‚½
-					/*if (ex is MissingReferenceException || ex is NullReferenceException)
-					{
-						//“r’†‚Åíœ‚µ‚Ä‚¢‚½‚ç‘ÎÛ‚Ì—v‘f‚ğíœ
-						_numberImageList.RemoveAt(i);
-					}*/
+				var index = GetIndexForChar(c);
+				if (index < 0 || index >= NumberAtlas.uvs.Length) continue;
 
-					//go = Instantiate(NumberPrefab);
-					go = new();
-					go.transform.parent = transform;
-					img = go.AddComponent<Image>();
-					_numberImageList.Add(img);
-				}
-
-				if (int.TryParse(strNum.Substring(i, 1), out int n))//”’l‚É•ÏŠ·‚Å‚«‚éê‡
+				var sprite = NumberAtlas.NumberSprites[index];
+				var uv = NumberAtlas.uvs[index];
+				if (sprite == null)
 				{
-					img.sprite = NumberSprites[n];
-					go.name = $"{OBJECT_DEFAULT_NAME}{Math.Pow(10, digit).ToString("e2")}_{strNum.Substring(i, 1)}";
-					digit--;
+					Debug.LogWarning($"[SpriteNumber] Sprite [{c}] ãŒ null ã‚„ã§ï¼");
+					continue; // ã‚¹ã‚­ãƒƒãƒ—ï¼
 				}
-				else//”’l‚É•ÏŠ·‚Å‚«‚È‚¢ê‡
-				{
-					if (strNum.Substring(i, 1) == ".")
-					{
-						img.sprite = _pointSprite;
-					}
-					else if (strNum.Substring(i, 1) == "-" && (UseSign == Sign.MinusOnly || UseSign == Sign.PlusAndMinus))
-					{
-						img.sprite = _minusSprite;
-					}
-					else if (strNum.Substring(i, 1) == "+" && (UseSign == Sign.PlusOnly || UseSign == Sign.PlusAndMinus))
-					{
-						img.sprite = _plusSprite;
-					}
-					go.name = $"{OBJECT_DEFAULT_NAME}Sign_{strNum.Substring(i, 1)}";
-				}
+				float aspect = sprite.rect.width / sprite.rect.height;
+				float drawWidth = preferredHeight * aspect;
 
-				RectTransform rect = go.GetComponent<RectTransform>();
-				//ƒTƒCƒY‚ğİ’è
-				if (img.sprite != null)
-				{
-					rect.sizeDelta = img.sprite.bounds.size * img.sprite.pixelsPerUnit;
-					if (maxHeight < rect.sizeDelta.y)
-					{
-						maxHeight = rect.sizeDelta.y;
-					}
-				}
-				else
-				{
-					rect.sizeDelta = new(100.0f, 100.0f);
-				}
+				Vector2 pos = new Vector2(offsetX, 0) + pivotOffset;
+				Rect rect = new Rect(pos, new Vector2(drawWidth, preferredHeight));
 
-				//ƒAƒ“ƒJ[Aƒsƒ{ƒbƒg‚ğİ’è
-				rect.anchorMin = rect.anchorMax = rect.pivot =
-					new(((int)Align % 3) * 0.5f, ((int)Align / 3) * 0.5f);
-				rect.anchoredPosition = new(offset, 0.0f);//¶‘µ‚¦‚Å‰¼ŒvZ ’†‰›A‰E‚Í‚Ì‚¿‚ÉÄŒvZ
-
-				//À•Wİ’è
-				offset += rect.sizeDelta.x + Spacing;
+				AddQuad(vh, rect, color, uv);
+				offsetX += drawWidth + Spacing;
 			}
 
-			//•s—v‚È‚à‚Ì‚Í”ñ•\¦‚É‚·‚é
-			for (int i = strNum.Length; i < _numberImageList.Count; i++)
-			{
-				_numberImageList[i].gameObject.SetActive(false);
-				_numberImageList[i].gameObject.name = $"{OBJECT_DEFAULT_NAME}X";
-			}
-
-			if ((int)Align % 3 == 0) return;//¶‘µ‚¦‚Í‚±‚±‚ÅI—¹
-
-			//rectTransform.sizeDelta = new(offset, maxHeight);
-
-			//ÅŒã‚É‰ÁZ‚µ‚½ƒXƒy[ƒX‚Æ‰æ‘œƒTƒCƒY•ª‚¾‚¯æ‚èÁ‚·
-			offset -= Spacing + ((RectTransform)_numberImageList[strNum.Length - 1].transform).sizeDelta.x;
-
-			for (int i = 0; i < strNum.Length; i++)
-			{
-				var vec = ((RectTransform)_numberImageList[i].transform).anchoredPosition;
-				if ((int)Align % 3 == 2)//‰E‘µ‚¦
-				{
-					vec = new(vec.x - offset, vec.y);
-				}
-				else if ((int)Align % 3 == 1)//’†‰›‘µ‚¦
-				{
-					vec = new(vec.x - offset / 2, vec.y);
-				}
-
-				((RectTransform)_numberImageList[i].transform).anchoredPosition = vec;
-			}
 		}
 
-		private int CalcDigit(string strNum)
+
+		int GetIndexForChar(char c)
 		{
-			if (strNum == null) throw new FormatException();
-			if (BigInteger.TryParse(strNum, out BigInteger intValue))
+			if (c >= '0' && c <= '9')
+				return c - '0';
+			else if (c == '+')
+				return 10;
+			else if (c == '-')
+				return 11;
+			else if (c == '.')
+				return 12;
+			else if (c == ',')
+				return 13;
+			return -1;
+		}
+
+		void AddQuad(VertexHelper vh, Rect rect, Color color, Rect uv)
+		{
+			Vector2 min = rect.min;
+			Vector2 max = rect.max;
+			int startIndex = vh.currentVertCount;
+
+			vh.AddVert(new Vector3(min.x, min.y), color, new Vector2(uv.xMin, uv.yMin));
+			vh.AddVert(new Vector3(min.x, max.y), color, new Vector2(uv.xMin, uv.yMax));
+			vh.AddVert(new Vector3(max.x, max.y), color, new Vector2(uv.xMax, uv.yMax));
+			vh.AddVert(new Vector3(max.x, min.y), color, new Vector2(uv.xMax, uv.yMin));
+
+			vh.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+			vh.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+		}
+
+
+		public virtual string FormatNumber()
+		{
+			if (Value == null) throw new ArgumentNullException(nameof(Value));
+
+			// å‹ã‚’åˆ¤å®šã—ã¦ decimal ã«çµ±ä¸€ï¼ˆç²¾åº¦å„ªå…ˆï¼‰
+			decimal value;
+
+			switch (Value)
 			{
-				return BigInteger.Abs(intValue).ToString().Length;
+				case int i: value = i; break;
+				case long l: value = l; break;
+				case float f: value = (decimal)f; break;
+				case double d: value = (decimal)d; break;
+				case decimal m: value = m; break;
+				case uint ui: value = ui; break;
+				case ulong ul: value = ul; break;
+				case short s: value = s; break;
+				case ushort us: value = us; break;
+				case byte b: value = b; break;
+				case sbyte sb: value = sb; break;
+				default: throw new ArgumentException("æœªå¯¾å¿œã®æ•°å€¤å‹ã§ã™", nameof(Value));
 			}
-			else if (float.TryParse(strNum, out float floatValue))
+
+			// ç¬¦å·å‡¦ç†
+			string sign = "";
+			if (value < 0)
 			{
-				return BigInteger.Abs((BigInteger)floatValue).ToString().Length;
+				if (SignMode == Sign.MinusOnly || SignMode == Sign.Both)
+					sign = "-";
+				value = -value;
 			}
-			else if (double.TryParse(strNum, out double doubleValue))
+			else if (value > 0)
 			{
-				return BigInteger.Abs((BigInteger)doubleValue).ToString().Length;
+				if (SignMode == Sign.PlusOnly || SignMode == Sign.Both)
+					sign = "+";
+			}
+
+			// æ•´æ•°éƒ¨ã¨å°æ•°éƒ¨ã‚’åˆ†é›¢
+			decimal integerPart = Math.Floor(value);
+			decimal fractionalPart = value - integerPart;
+
+			string integerStr;
+
+			if (PadIntegerPart)
+			{
+				// 0åŸ‹ã‚å„ªå…ˆï¼ˆæ¡æ•°å›ºå®šï¼‰
+				integerStr = ((ulong)integerPart).ToString().PadLeft((int)IntegerPartDigits, '0');
+
+				if (GroupDigits)
+				{
+					// ä¸‰æ¡åŒºåˆ‡ã‚Šã‚’è‡ªåŠ›ã§æŒ¿å…¥ï¼ˆã‚«ãƒ³ãƒå›ºå®šï¼‰
+					integerStr = InsertGroupingSeparator(integerStr);
+				}
 			}
 			else
 			{
-				throw new FormatException();
-			}
-		}
-		#endregion
+				// ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°ãªã—
+				integerStr = ((ulong)integerPart).ToString();
 
-		#region ‰æ‘œİ’è
-		/// <summary>
-		/// ‰æ‘œİ’è
-		/// </summary>
-		/// <param name="zero"></param>
-		/// <param name="one"></param>
-		/// <param name="two"></param>
-		/// <param name="three"></param>
-		/// <param name="four"></param>
-		/// <param name="five"></param>
-		/// <param name="six"></param>
-		/// <param name="seven"></param>
-		/// <param name="eight"></param>
-		/// <param name="nine"></param>
-		/// <param name="plus"></param>
-		/// <param name="minus"></param>
-		/// <param name="point"></param>
-		public void SetSprite(Sprite zero, Sprite one, Sprite two,
-			Sprite three, Sprite four, Sprite five, Sprite six,
-			Sprite seven, Sprite eight, Sprite nine, Sprite plus, Sprite minus, Sprite point)
-		{
-			_zero = zero;
-			_one = one;
-			_two = two;
-			_three = three;
-			_four = four;
-			_five = five;
-			_six = six;
-			_seven = seven;
-			_eight = eight;
-			_nine = nine;
-
-			_minusSprite = minus;
-			_plusSprite = plus;
-			_pointSprite = point;
-		}
-
-		/// <summary>
-		/// ‰æ‘œİ’è
-		/// </summary>
-		/// <param name="zero"></param>
-		/// <param name="one"></param>
-		/// <param name="two"></param>
-		/// <param name="three"></param>
-		/// <param name="four"></param>
-		/// <param name="five"></param>
-		/// <param name="six"></param>
-		/// <param name="seven"></param>
-		/// <param name="eight"></param>
-		/// <param name="nine"></param>
-		/// <param name="plus"></param>
-		/// <param name="minus"></param>
-		public void SetSprite(Sprite zero, Sprite one, Sprite two,
-			Sprite three, Sprite four, Sprite five, Sprite six,
-			Sprite seven, Sprite eight, Sprite nine, Sprite plus, Sprite minus)
-		{
-			SetSprite(zero, one, two,
-			 three, four, five, six,
-			 seven, eight, nine, plus, minus, _pointSprite);
-		}
-
-
-		/// <summary>
-		/// 0~9‚Ì‰æ‘œİ’è
-		/// </summary>
-		/// <param name="zero"></param>
-		/// <param name="one"></param>
-		/// <param name="two"></param>
-		/// <param name="three"></param>
-		/// <param name="four"></param>
-		/// <param name="five"></param>
-		/// <param name="six"></param>
-		/// <param name="seven"></param>
-		/// <param name="eight"></param>
-		/// <param name="nine"></param>
-		public void SetSprite(Sprite zero, Sprite one, Sprite two,
-			Sprite three, Sprite four, Sprite five, Sprite six,
-			Sprite seven, Sprite eight, Sprite nine)
-		{
-			SetSprite(zero, one, two, three, four, five, six, seven, eight, nine, _plusSprite, _minusSprite);
-		}
-
-		/// <summary>
-		/// •„†‚Ì‰æ‘œİ’è
-		/// </summary>
-		/// <param name="plus"></param>
-		/// <param name="minus"></param>
-		public void SetSprite(Sprite plus, Sprite minus)
-		{
-			SetSprite(_zero, _one, _two, _three, _four, _five, _six
-				, _seven, _eight, _nine, plus, minus);
-		}
-
-		/// <summary>
-		/// ­”“_‚Ì‰æ‘œİ’è
-		/// </summary>
-		/// <param name="point"></param>
-		public void SetSprite(Sprite point)
-		{
-			SetSprite(_zero, _one, _two, _three, _four, _five, _six
-				, _seven, _eight, _nine, _plusSprite, _minusSprite, point);
-		}
-		#endregion
-
-		#region ƒGƒfƒBƒ^[ŠÖ”
-#if UNITY_EDITOR
-		private void OnValidate()
-		{
-			UnityEditor.EditorApplication.update += OnValidateImpl;
-		}
-
-		protected void OnValidateImpl()
-		{
-			//ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚ğíœ
-			UnityEditor.EditorApplication.update -= OnValidateImpl;
-			//©g‚ªíœÏ‚İ‚Å‚ ‚ê‚Î‚È‚É‚à‚µ‚È‚¢
-			if (this == null) return;
-
-			if (!enabled) return;
-			if (rectTransform == null)
-			{
-				rectTransform = GetComponent<RectTransform>();
-			}
-			CreateImage(CreateStrNum());
-		}
-
-		private void Reset()
-		{
-			for (int i = 0; i < transform.childCount;)
-			{
-				Transform child = transform.GetChild(i);
-				if (child.name.StartsWith(OBJECT_DEFAULT_NAME))
+				if (GroupDigits)
 				{
-					DestroyImmediate(child.gameObject);
+					// ä¸‰æ¡åŒºåˆ‡ã‚Šã‚’è‡ªåŠ›ã§æŒ¿å…¥ï¼ˆã‚«ãƒ³ãƒå›ºå®šï¼‰
+					integerStr = InsertGroupingSeparator(integerStr);
+				}
+			}
+
+
+
+			string decimalStr = "";
+			if (DecimalPartDigits > 0)
+			{
+				if (PadDecimalPart)
+				{
+					// å›ºå®šå°æ•°æ¡ï¼ˆ0åŸ‹ã‚ï¼‰
+					decimalStr = fractionalPart.ToString("F" + DecimalPartDigits, CultureInfo.InvariantCulture);
+					decimalStr = decimalStr.Substring(decimalStr.IndexOf('.')); // ".0001"
 				}
 				else
 				{
-					i++;
+					// è¡¨ç¤ºã¯ã™ã‚‹ã‘ã©æœ«å°¾ã®0ã¯çœç•¥
+					string format = "0." + new string('#', (int)DecimalPartDigits);
+					decimalStr = value.ToString(format, CultureInfo.InvariantCulture);
+
+					int dotIndex = decimalStr.IndexOf('.');
+					if (dotIndex >= 0)
+					{
+						decimalStr = decimalStr.Substring(dotIndex);
+					}
+					else
+					{
+						decimalStr = ""; // å°æ•°ç‚¹ãŒå‡ºãªã‹ã£ãŸ
+					}
 				}
 			}
-			OnValidate();
-		}
 
-		[ContextMenu("Remove Component", false)]
-		protected virtual void RemoveComponent()
+			return sign + integerStr + decimalStr;
+		}
+		protected virtual string InsertGroupingSeparator(string raw)
 		{
-			Debug.Log("‚è‚Ş[[[[‚ÔI");
+			if (string.IsNullOrEmpty(raw) || raw.Length <= 3)
+				return raw;
+
+			var chars = new List<char>();
+			int count = 0;
+
+			for (int i = raw.Length - 1; i >= 0; i--)
+			{
+				chars.Insert(0, raw[i]);
+				count++;
+				if (count == 3 && i > 0)
+				{
+					chars.Insert(0, ','); // â† ã‚«ãƒ³ãƒã§å›ºå®šï¼
+					count = 0;
+				}
+			}
+
+			return new string(chars.ToArray());
 		}
 
 
-#endif
-		#endregion
+
+		private void ApplyRectLock()
+		{
+			tracker.Clear();
+
+			// âœ¨ Stretchã•ã‚Œã¦ãŸã‚‰ã€å¼·åˆ¶çš„ã«å›ºå®šAnchorã«ã™ã‚‹ï¼ˆ0,0ï¼‰
+			if (rectTransform.anchorMin != rectTransform.anchorMax)
+			{
+				Debug.LogWarning($"[SpriteNumber] Stretchã¯éå¯¾å¿œã§ã™ï¼å›ºå®šAnchorã«å¤‰æ›´ã•ã‚Œã¾ã—ãŸã€‚", this);
+				rectTransform.anchorMin = rectTransform.anchorMax = new Vector2(0, 0);
+			}
+
+			tracker.Add(this, rectTransform,
+				DrivenTransformProperties.Anchors |
+				DrivenTransformProperties.SizeDelta
+			// AnchoredPosition ã¯å‰å›é™¤å¤–æ¸ˆã¿
+			);
+
+			rectTransform.anchoredPosition = rectTransform.anchoredPosition; // ç¶­æŒ
+		}
+
+
+		private void UpdateRectSize()
+		{
+			if (NumberAtlas == null || NumberAtlas.uvs == null || NumberAtlas.uvs.Length == 0) return;
+
+			float totalWidth = 0f;
+			int visibleCount = 0;
+
+			string numberStr = FormatNumber();
+			foreach (char c in numberStr)
+			{
+				var i = GetIndexForChar(c);
+				if (i < 0 || i >= NumberAtlas.uvs.Length) continue;
+
+				var sprite = NumberAtlas.NumberSprites[i];
+				if (sprite == null) continue;
+
+				float aspect = sprite.rect.width / sprite.rect.height;
+				totalWidth += preferredHeight * aspect;
+				visibleCount++;
+			}
+
+			if (visibleCount > 1)
+				totalWidth += Spacing * (visibleCount - 1);
+
+			rectTransform.sizeDelta = new Vector2(totalWidth, preferredHeight);
+		}
+
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+			ApplyRectLock();
+			UpdateRectSize();
+		}
+		protected void LateUpdate()
+		{
+			// æœ€çµ‚ã‚µã‚¤ã‚ºæ›´æ–°ï¼ˆå¿µã®ãŸã‚ï¼‰
+			UpdateRectSize();
+		}
+
+		protected override void OnDisable()
+		{
+			base.OnDisable();
+			tracker.Clear();
+		}
+
 	}
 }
