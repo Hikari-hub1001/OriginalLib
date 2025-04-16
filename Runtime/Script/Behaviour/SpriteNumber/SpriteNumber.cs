@@ -7,12 +7,20 @@ using UnityEngine.UI;
 namespace OriginalLib.Behaviour
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	public abstract class SpriteNumber<T> : MaskableGraphic
+	public abstract class SpriteNumbarBase:MaskableGraphic
 	{
 		public override Texture mainTexture => NumberAtlas?.GetAtlas() ?? s_WhiteTexture;
 
+		/// <summary>
+		/// 表示用アトラス画像
+		/// </summary>
 		public SpriteNumberAtlasSO NumberAtlas;
-
+	}
+	public abstract class SpriteNumber<T> : SpriteNumbarBase
+	{
+		/// <summary>
+		/// 画像サイズ
+		/// </summary>
 		[Tooltip("このGraphicの高さを決める値（幅はスプライトに合わせて自動算出）")]
 		public float preferredHeight = 100f;
 		[Tooltip("スプライト同士の間隔（px単位・高さスケールに基づく）")]
@@ -69,7 +77,7 @@ namespace OriginalLib.Behaviour
 		protected override void OnPopulateMesh(VertexHelper vh)
 		{
 			vh.Clear();
-			if (NumberAtlas == null || NumberAtlas.GetAtlas() == null || NumberAtlas.uvs == null) return;
+			if (NumberAtlas == null || NumberAtlas.GetAtlas() == null || NumberAtlas.Sprites == null) return;
 
 			float height = preferredHeight;
 			float atlasRatio = NumberAtlas.GetAtlas().width / (float)NumberAtlas.GetAtlas().height;
@@ -83,9 +91,8 @@ namespace OriginalLib.Behaviour
 			foreach (char c in numberStr)
 			{
 				var index = GetIndexForChar(c);
-				if (index < 0 || index >= NumberAtlas.uvs.Length) continue;
-				var uv = NumberAtlas.uvs[index];
-				float width = uv.width * height * atlasRatio;
+				if (index < 0 || index >= NumberAtlas.Sprites.Length) continue;
+				float width = NumberAtlas.Sprites[index].rect.width;
 				spriteWidths.Add(width);
 				totalWidth += width;
 			}
@@ -100,16 +107,10 @@ namespace OriginalLib.Behaviour
 			foreach (char c in numberStr)
 			{
 				var index = GetIndexForChar(c);
-				if (index < 0 || index >= NumberAtlas.uvs.Length) continue;
+				if (index < 0 || index >= NumberAtlas.Sprites.Length) continue;
 
-				var sprite = NumberAtlas.NumberSprites[index];
-				var uv = NumberAtlas.uvs[index];
-				if (sprite == null)
-				{
-					Debug.LogWarning($"[SpriteNumber] Sprite [{c}] が null やで！");
-					continue; // スキップ！
-				}
-				float aspect = sprite.rect.width / sprite.rect.height;
+				var uv = NumberAtlas.Sprites[index].rect;
+				float aspect = uv.width / uv.height;
 				float drawWidth = preferredHeight * aspect;
 
 				Vector2 pos = new Vector2(offsetX, 0) + pivotOffset;
@@ -120,7 +121,6 @@ namespace OriginalLib.Behaviour
 			}
 
 		}
-
 
 		int GetIndexForChar(char c)
 		{
@@ -142,11 +142,11 @@ namespace OriginalLib.Behaviour
 			Vector2 min = rect.min;
 			Vector2 max = rect.max;
 			int startIndex = vh.currentVertCount;
-
-			vh.AddVert(new Vector3(min.x, min.y), color, new Vector2(uv.xMin, uv.yMin));
-			vh.AddVert(new Vector3(min.x, max.y), color, new Vector2(uv.xMin, uv.yMax));
-			vh.AddVert(new Vector3(max.x, max.y), color, new Vector2(uv.xMax, uv.yMax));
-			vh.AddVert(new Vector3(max.x, min.y), color, new Vector2(uv.xMax, uv.yMin));
+			Vector2 texSize = new(mainTexture.width, mainTexture.height);
+			vh.AddVert(new Vector3(min.x, min.y), color, new Vector2(uv.xMin, uv.yMin) / texSize);
+			vh.AddVert(new Vector3(min.x, max.y), color, new Vector2(uv.xMin, uv.yMax) / texSize);
+			vh.AddVert(new Vector3(max.x, max.y), color, new Vector2(uv.xMax, uv.yMax) / texSize);
+			vh.AddVert(new Vector3(max.x, min.y), color, new Vector2(uv.xMax, uv.yMin) / texSize);
 
 			vh.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
 			vh.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
@@ -219,8 +219,6 @@ namespace OriginalLib.Behaviour
 				}
 			}
 
-
-
 			string decimalStr = "";
 			if (DecimalPartDigits > 0)
 			{
@@ -272,8 +270,6 @@ namespace OriginalLib.Behaviour
 			return new string(chars.ToArray());
 		}
 
-
-
 		private void ApplyRectLock()
 		{
 			tracker.Clear();
@@ -282,22 +278,20 @@ namespace OriginalLib.Behaviour
 			if (rectTransform.anchorMin != rectTransform.anchorMax)
 			{
 				Debug.LogWarning($"[SpriteNumber] Stretchは非対応です！固定Anchorに変更されました。", this);
-				rectTransform.anchorMin = rectTransform.anchorMax = new Vector2(0, 0);
+				rectTransform.anchorMin = rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
 			}
 
 			tracker.Add(this, rectTransform,
 				DrivenTransformProperties.Anchors |
 				DrivenTransformProperties.SizeDelta
-			// AnchoredPosition は前回除外済み
 			);
 
 			rectTransform.anchoredPosition = rectTransform.anchoredPosition; // 維持
 		}
 
-
 		private void UpdateRectSize()
 		{
-			if (NumberAtlas == null || NumberAtlas.uvs == null || NumberAtlas.uvs.Length == 0) return;
+			if (NumberAtlas == null || NumberAtlas.Sprites == null || NumberAtlas.Sprites.Length == 0) return;
 
 			float totalWidth = 0f;
 			int visibleCount = 0;
@@ -306,9 +300,9 @@ namespace OriginalLib.Behaviour
 			foreach (char c in numberStr)
 			{
 				var i = GetIndexForChar(c);
-				if (i < 0 || i >= NumberAtlas.uvs.Length) continue;
+				if (i < 0 || i >= NumberAtlas.Sprites.Length) continue;
 
-				var sprite = NumberAtlas.NumberSprites[i];
+				var sprite = NumberAtlas.Sprites[i];
 				if (sprite == null) continue;
 
 				float aspect = sprite.rect.width / sprite.rect.height;

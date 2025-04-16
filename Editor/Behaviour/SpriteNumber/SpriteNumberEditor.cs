@@ -35,7 +35,7 @@ namespace OriginalLib.Behaviour
 			EditorGUILayout.Space();
 
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("Value"));
-
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("preferredHeight"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("Spacing"));
 
 			if (useInteger)
@@ -83,13 +83,13 @@ namespace OriginalLib.Behaviour
 		{
 
 			var numberAtlas = serializedObject.FindProperty("NumberAtlas");
-			if (numberAtlas != null)
+			if (numberAtlas != null && numberAtlas.objectReferenceValue != null)
 			{
 				// ”wŒi•`‰æ
 				if (Event.current.type == EventType.Repaint)
 					background.Draw(r, false, false, false, false);
 
-				GUI.DrawTexture(r, ((SpriteNumberAtlasSO)numberAtlas.objectReferenceValue).generatedAtlas, ScaleMode.ScaleToFit);
+				GUI.DrawTexture(r, ((SpriteNumberAtlasSO)numberAtlas?.objectReferenceValue)?.GetAtlas(), ScaleMode.ScaleToFit);
 			}
 		}
 

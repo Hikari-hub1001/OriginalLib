@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace OriginalLib.Behaviour
 {
-	[CreateAssetMenu(menuName = "Custom/RuntimePackedAtlas_TransparentSafe")]
+	[CreateAssetMenu(menuName = "OriginalLib/SpriteNumberAtlas")]
 	public class SpriteNumberAtlasSO : ScriptableObject
 	{
 		//public Sprite[] sourceSprites;
@@ -38,119 +39,135 @@ namespace OriginalLib.Behaviour
 		[SerializeField] protected Sprite _groupSeparatorSprite;
 
 		private Sprite[] _numberSprites;
-		public Sprite[] NumberSprites => _numberSprites ??= new Sprite[] {
-		_zero, _one, _two, _three, _four,
-		_five, _six, _seven, _eight, _nine,
-		_plusSprite,_minusSprite,_pointSprite,_groupSeparatorSprite
-	};
+		private Sprite[] NumberSprites => _numberSprites ??= new Sprite[] {
+			_zero, _one, _two, _three, _four,
+			_five, _six, _seven, _eight, _nine,
+			_plusSprite,_minusSprite,_pointSprite,_groupSeparatorSprite
+		};
 
+		private Texture2D generatedAtlas;
+		[SerializeField, HideInInspector] private byte[] _atlasTextureData;
 
-		[HideInInspector] public Texture2D generatedAtlas;
-		[HideInInspector] public Rect[] uvs;
+		public Sprite[] Sprites { get; private set; }
+
 
 		private void BuildAtlas()
 		{
-			_numberSprites = null;
-
-			if (NumberSprites == null || NumberSprites.Length == 0) return;
-
-			int count = NumberSprites.Length;
-			int[] fullWidths = new int[count];
-			int[] fullHeights = new int[count];
-
-			int totalWidth = 0;
-			int maxHeight = 0;
-
-			// 透過込みの見た目サイズ（rect）を元に計算
-			for (int i = 0; i < count; i++)
+			try
 			{
-				var sprite = NumberSprites[i];
-				if (sprite == null)
+				_numberSprites = null;
+
+				if (NumberSprites == null || NumberSprites.Length == 0) return;
+
+				int count = NumberSprites.Length;
+				int[] fullWidths = new int[count];
+				int[] fullHeights = new int[count];
+
+				int totalWidth = 0;
+				int maxHeight = 0;
+
+				// 透過込みの見た目サイズ（rect）を元に計算
+				for (int i = 0; i < count; i++)
 				{
-					Debug.LogWarning($"[BuildAtlas] Sprite index {i} が null やで！");
-					continue; // スキップ！
-				}
-
-				fullWidths[i] = Mathf.RoundToInt(sprite.rect.width);
-				fullHeights[i] = Mathf.RoundToInt(sprite.rect.height);
-				totalWidth += fullWidths[i];
-				maxHeight = Mathf.Max(maxHeight, fullHeights[i]);
-			}
-
-			// 旧テクスチャ破棄
-			if (generatedAtlas != null)
-			{
-				DestroyImmediate(generatedAtlas);
-				generatedAtlas = null;
-			}
-
-			// Atlas初期化
-			generatedAtlas = new Texture2D(totalWidth, maxHeight, TextureFormat.RGBA32, false);
-			generatedAtlas.filterMode = FilterMode.Point;
-			generatedAtlas.wrapMode = TextureWrapMode.Clamp;
-
-			// 全透明で初期化
-			Color[] clear = Enumerable.Repeat(new Color(0, 0, 0, 0), totalWidth * maxHeight).ToArray();
-			generatedAtlas.SetPixels(clear);
-
-			uvs = new Rect[count];
-			int offsetX = 0;
-
-			for (int i = 0; i < count; i++)
-			{
-				var sprite = NumberSprites[i];
-				if (sprite == null)
-				{
-					Debug.LogWarning($"[BuildAtlas] Sprite index {i} が null やで！");
-					continue; // スキップ！
-				}
-				var tex = sprite.texture;
-
-				var rect = sprite.rect; // 見た目サイズ
-				var texRect = sprite.textureRect; // 実画像位置
-
-				int fullW = Mathf.RoundToInt(sprite.rect.width);
-				int fullH = Mathf.RoundToInt(sprite.rect.height);
-
-				int px = Mathf.FloorToInt(sprite.textureRect.x);
-				int py = Mathf.FloorToInt(sprite.textureRect.y);
-				int pw = Mathf.FloorToInt(sprite.textureRect.width);
-				int ph = Mathf.FloorToInt(sprite.textureRect.height);
-
-				var rawPixels = sprite.texture.GetPixels(px, py, pw, ph);
-				Color[] fullPixels = Enumerable.Repeat(new Color(0, 0, 0, 0), fullW * fullH).ToArray();
-
-				// 🧠 ←ここが超重要
-				int offsetInnerX = Mathf.RoundToInt(sprite.textureRect.x - sprite.rect.x);
-				int offsetInnerY = Mathf.RoundToInt(sprite.textureRect.y - sprite.rect.y);
-
-				for (int y = 0; y < ph; y++)
-				{
-					for (int x = 0; x < pw; x++)
+					var sprite = NumberSprites[i];
+					if (sprite == null)
 					{
-						int src = y * pw + x;
-						int dst = (y + offsetInnerY) * fullW + (x + offsetInnerX);
-						fullPixels[dst] = rawPixels[src];
+						Debug.LogWarning($"[BuildAtlas] Sprite index {i} が null やで！");
+						continue; // スキップ！
 					}
+
+					fullWidths[i] = Mathf.RoundToInt(sprite.rect.width);
+					fullHeights[i] = Mathf.RoundToInt(sprite.rect.height);
+					totalWidth += fullWidths[i];
+					maxHeight = Mathf.Max(maxHeight, fullHeights[i]);
 				}
 
+				// 旧テクスチャ破棄
+				if (generatedAtlas != null)
+				{
+					DestroyImmediate(generatedAtlas);
+					generatedAtlas = null;
+				}
 
+				// Atlas初期化
+				generatedAtlas = new Texture2D(totalWidth, maxHeight, TextureFormat.RGBA32, false);
+				generatedAtlas.filterMode = FilterMode.Point;
+				generatedAtlas.wrapMode = TextureWrapMode.Clamp;
 
-				// Atlasに貼り付け
-				generatedAtlas.SetPixels(offsetX, 0, fullW, fullH, fullPixels);
+				// 全透明で初期化
+				Color[] clear = Enumerable.Repeat(new Color(0, 0, 0, 0), totalWidth * maxHeight).ToArray();
+				generatedAtlas.SetPixels(clear);
 
-				// UV記録
-				uvs[i] = new Rect(
-					(float)offsetX / totalWidth,
-					0f,
-					(float)fullW / totalWidth,
-					(float)fullH / maxHeight
-				);
+				Sprites = new Sprite[count]; // 初期化！
+				int offsetX = 0;
 
-				offsetX += fullW;
-			}
+				for (int i = 0; i < count; i++)
+				{
+					var sprite = NumberSprites[i];
+					if (sprite == null)
+					{
+						Debug.LogWarning($"[BuildAtlas] Sprite index {i} が null やで！");
+						//uvs[i] = new Rect(
+						//	(float)offsetX / totalWidth,
+						//	0f,
+						//	0f,
+						//	0f
+						//);
+						continue; // スキップ！
+					}
+					var tex = sprite.texture;
 
-			generatedAtlas.Apply();
+					var rect = sprite.rect; // 見た目サイズ
+					var texRect = sprite.textureRect; // 実画像位置
+
+					int fullW = Mathf.RoundToInt(sprite.rect.width);
+					int fullH = Mathf.RoundToInt(sprite.rect.height);
+
+					int px = Mathf.FloorToInt(sprite.textureRect.x);
+					int py = Mathf.FloorToInt(sprite.textureRect.y);
+					int pw = Mathf.FloorToInt(sprite.textureRect.width);
+					int ph = Mathf.FloorToInt(sprite.textureRect.height);
+
+					var rawPixels = sprite.texture.GetPixels(px, py, pw, ph);
+					Color[] fullPixels = Enumerable.Repeat(new Color(0, 0, 0, 0), fullW * fullH).ToArray();
+
+					// 🧠 ←ここが超重要
+					int offsetInnerX = Mathf.RoundToInt(sprite.textureRect.x - sprite.rect.x);
+					int offsetInnerY = Mathf.RoundToInt(sprite.textureRect.y - sprite.rect.y);
+
+					for (int y = 0; y < ph; y++)
+					{
+						for (int x = 0; x < pw; x++)
+						{
+							int src = y * pw + x;
+							int dst = (y + offsetInnerY) * fullW + (x + offsetInnerX);
+							fullPixels[dst] = rawPixels[src];
+						}
+					}
+
+					// Atlasに貼り付け
+					generatedAtlas.SetPixels(offsetX, 0, fullW, fullH, fullPixels);
+
+					// UV記録
+					//uvs[i] = new Rect(
+					//	(float)offsetX / totalWidth,
+					//	0f,
+					//	(float)fullW / totalWidth,
+					//	(float)fullH / maxHeight
+					//);
+					// 最後に追加：Sprite作成
+					Sprites[i] = Sprite.Create(
+						generatedAtlas,
+						new Rect(offsetX, 0, fullW, fullH),
+						new Vector2(0.5f, 0.5f),
+						100f
+					);
+
+					offsetX += fullW;
+				}
+
+				generatedAtlas.Apply();
+				_atlasTextureData = generatedAtlas.EncodeToPNG(); // PNGバイナリで保存
 
 #if UNITY_EDITOR && false
 		// PNG出力＆スプライト分割（おまけ）
@@ -166,10 +183,15 @@ namespace OriginalLib.Behaviour
 			importer.alphaIsTransparency = true;
 			importer.filterMode = FilterMode.Point;
 
-			UnityEditor.SpriteMetaData[] metas = new UnityEditor.SpriteMetaData[uvs.Length];
-			for (int i = 0; i < uvs.Length; i++)
+			UnityEditor.SpriteMetaData[] metas = new UnityEditor.SpriteMetaData[sprites.Length];
+			for (int i = 0; i < sprites.Length; i++)
 			{
-				Rect uv = uvs[i];
+				Vector2[] uvs = sprites[i].uv;
+				Rect uv = new Rect(
+					uvs[0].x, uvs[0].y,
+					uvs[2].x - uvs[0].x,
+					uvs[2].y - uvs[0].y
+				);
 				Rect pixelRect = new Rect(
 					Mathf.RoundToInt(uv.x * generatedAtlas.width),
 					generatedAtlas.height - Mathf.RoundToInt(uv.y * generatedAtlas.height) - Mathf.RoundToInt(uv.height * generatedAtlas.height),
@@ -193,7 +215,15 @@ namespace OriginalLib.Behaviour
 
 		Debug.Log("✅ 透過保持・合体完了！出力: GeneratedAtlas_TransparentSafe.png");
 #endif
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError(e);
+			}
+			finally
+			{
 
+			}
 		}
 
 		private void OnDestroy()
@@ -201,6 +231,17 @@ namespace OriginalLib.Behaviour
 			DestroyImmediate(generatedAtlas);
 			generatedAtlas = null;
 		}
-		public Texture2D GetAtlas() => generatedAtlas;
+		public Texture2D GetAtlas()
+		{
+			if (generatedAtlas == null && _atlasTextureData != null && _atlasTextureData.Length > 0)
+			{
+				generatedAtlas = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+				generatedAtlas.LoadImage(_atlasTextureData); // PNG形式バイナリから復元
+				generatedAtlas.filterMode = FilterMode.Point;
+				generatedAtlas.wrapMode = TextureWrapMode.Clamp;
+			}
+			return generatedAtlas;
+		}
+
 	}
 }

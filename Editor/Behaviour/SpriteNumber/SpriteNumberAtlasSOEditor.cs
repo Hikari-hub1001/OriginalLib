@@ -8,8 +8,8 @@ namespace OriginalLib.Behaviour
 	[CustomEditor(typeof(SpriteNumberAtlasSO))]
 	public class SpriteNumberAtlasSOEditor : Editor
 	{
-		protected bool _isNumOpen = false;
-		protected bool _isSignOpen = false;
+		protected bool _isNumOpen = true;
+		protected bool _isSignOpen = true;
 
 
 		public override void OnInspectorGUI()
@@ -78,11 +78,12 @@ namespace OriginalLib.Behaviour
 
 		private void BuildAtlasSafely(SpriteNumberAtlasSO so)
 		{
-			if (so.NumberSprites == null) return;
+			var sprites = typeof(SpriteNumberAtlasSO).GetProperty("NumberSprites", BindingFlags.NonPublic | BindingFlags.Instance);
+			if (sprites.GetValue(so) == null) return;
 
 			var changedAssets = new List<(string path, bool wasReadable)>();
 
-			foreach (var sprite in so.NumberSprites)
+			foreach (var sprite in (Sprite[])sprites.GetValue(so))
 			{
 				if (sprite == null) continue;
 
@@ -102,23 +103,43 @@ namespace OriginalLib.Behaviour
 			}
 
 			var buildMethod = typeof(SpriteNumberAtlasSO).GetMethod("BuildAtlas", BindingFlags.NonPublic | BindingFlags.Instance);
-			buildMethod?.Invoke(so, null);
-
-			foreach (var (path, wasReadable) in changedAssets)
+			try
 			{
-				if (!wasReadable)
+
+				buildMethod?.Invoke(so, null);
+			}
+			finally
+			{
+
+				foreach (var (path, wasReadable) in changedAssets)
 				{
-					var importer = AssetImporter.GetAtPath(path) as TextureImporter;
-					if (importer != null)
+					if (!wasReadable)
 					{
-						importer.isReadable = false;
-						importer.SaveAndReimport();
+						var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+						if (importer != null)
+						{
+							importer.isReadable = false;
+							importer.SaveAndReimport();
+						}
 					}
 				}
-			}
 
+#if UNITY_6000
+				var all = GameObject.FindObjectsByType<SpriteNumbarBase>(FindObjectsSortMode.None);
+#else
+				var all = GameObject.FindObjectsOfType<SpriteNumbarBase>();
+#endif
+				foreach (var sn in all)
+				{
+					if (sn.NumberAtlas == target)
+						sn.SetVerticesDirty();
+				}
+			}
 			EditorUtility.SetDirty(so);
 			Debug.Log("✅ Atlas successfully rebuilt.");
 		}
+
+
+
 	}
 }
