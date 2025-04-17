@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace OriginalLib.Behaviour
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	public abstract class SpriteNumbarBase:MaskableGraphic
+	public abstract class SpriteNumbarBase : MaskableGraphic
 	{
 		public override Texture mainTexture => NumberAtlas?.GetAtlas() ?? s_WhiteTexture;
 
@@ -92,6 +92,8 @@ namespace OriginalLib.Behaviour
 			{
 				var index = GetIndexForChar(c);
 				if (index < 0 || index >= NumberAtlas.Sprites.Length) continue;
+				if (NumberAtlas?.Sprites[index] == null) continue;
+
 				float width = NumberAtlas.Sprites[index].rect.width;
 				spriteWidths.Add(width);
 				totalWidth += width;
@@ -108,6 +110,7 @@ namespace OriginalLib.Behaviour
 			{
 				var index = GetIndexForChar(c);
 				if (index < 0 || index >= NumberAtlas.Sprites.Length) continue;
+				if (NumberAtlas?.Sprites[index] == null) continue;
 
 				var uv = NumberAtlas.Sprites[index].rect;
 				float aspect = uv.width / uv.height;
@@ -282,11 +285,9 @@ namespace OriginalLib.Behaviour
 			}
 
 			tracker.Add(this, rectTransform,
-				DrivenTransformProperties.Anchors |
 				DrivenTransformProperties.SizeDelta
 			);
 
-			rectTransform.anchoredPosition = rectTransform.anchoredPosition; // 維持
 		}
 
 		private void UpdateRectSize()

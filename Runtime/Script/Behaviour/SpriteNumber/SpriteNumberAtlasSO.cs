@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace OriginalLib.Behaviour
 {
@@ -47,6 +46,8 @@ namespace OriginalLib.Behaviour
 
 		private Texture2D generatedAtlas;
 		[SerializeField, HideInInspector] private byte[] _atlasTextureData;
+		[SerializeField, HideInInspector] private Rect[] _spriteRects; // 各スプライトのRect（ピクセル単位）
+
 
 		public Sprite[] Sprites { get; private set; }
 
@@ -99,6 +100,7 @@ namespace OriginalLib.Behaviour
 				generatedAtlas.SetPixels(clear);
 
 				Sprites = new Sprite[count]; // 初期化！
+				_spriteRects = new Rect[count];
 				int offsetX = 0;
 
 				for (int i = 0; i < count; i++)
@@ -162,58 +164,19 @@ namespace OriginalLib.Behaviour
 						new Vector2(0.5f, 0.5f),
 						100f
 					);
-
+					_spriteRects[i] = new Rect(offsetX, 0, fullW, fullH); // ← Sprite再構築用
 					offsetX += fullW;
 				}
 
 				generatedAtlas.Apply();
 				_atlasTextureData = generatedAtlas.EncodeToPNG(); // PNGバイナリで保存
 
-#if UNITY_EDITOR && false
-		// PNG出力＆スプライト分割（おまけ）
-		string path = "Assets/GeneratedAtlas_TransparentSafe.png";
-		System.IO.File.WriteAllBytes(path, generatedAtlas.EncodeToPNG());
-		UnityEditor.AssetDatabase.ImportAsset(path, UnityEditor.ImportAssetOptions.ForceUpdate);
+#if UNITY_EDITOR && true
+				// PNG出力＆スプライト分割（おまけ）
+				string path = "Assets/GeneratedAtlas_TransparentSafe.png";
+				System.IO.File.WriteAllBytes(path, generatedAtlas.EncodeToPNG());
 
-		UnityEditor.TextureImporter importer = UnityEditor.AssetImporter.GetAtPath(path) as UnityEditor.TextureImporter;
-		if (importer != null)
-		{
-			importer.textureType = UnityEditor.TextureImporterType.Sprite;
-			importer.spriteImportMode = UnityEditor.SpriteImportMode.Multiple;
-			importer.alphaIsTransparency = true;
-			importer.filterMode = FilterMode.Point;
-
-			UnityEditor.SpriteMetaData[] metas = new UnityEditor.SpriteMetaData[sprites.Length];
-			for (int i = 0; i < sprites.Length; i++)
-			{
-				Vector2[] uvs = sprites[i].uv;
-				Rect uv = new Rect(
-					uvs[0].x, uvs[0].y,
-					uvs[2].x - uvs[0].x,
-					uvs[2].y - uvs[0].y
-				);
-				Rect pixelRect = new Rect(
-					Mathf.RoundToInt(uv.x * generatedAtlas.width),
-					generatedAtlas.height - Mathf.RoundToInt(uv.y * generatedAtlas.height) - Mathf.RoundToInt(uv.height * generatedAtlas.height),
-					Mathf.RoundToInt(uv.width * generatedAtlas.width),
-					Mathf.RoundToInt(uv.height * generatedAtlas.height)
-				);
-
-				metas[i] = new UnityEditor.SpriteMetaData()
-				{
-					name = $"Sprite_{i}",
-					rect = pixelRect,
-					alignment = 9,
-					pivot = new Vector2(0.5f, 0.5f)
-				};
-			}
-
-			importer.spritesheet = metas;
-			UnityEditor.EditorUtility.SetDirty(importer);
-			importer.SaveAndReimport();
-		}
-
-		Debug.Log("✅ 透過保持・合体完了！出力: GeneratedAtlas_TransparentSafe.png");
+				Debug.Log("✅ 透過保持・合体完了！出力: GeneratedAtlas_TransparentSafe.png");
 #endif
 			}
 			catch (System.Exception e)
@@ -239,6 +202,17 @@ namespace OriginalLib.Behaviour
 				generatedAtlas.LoadImage(_atlasTextureData); // PNG形式バイナリから復元
 				generatedAtlas.filterMode = FilterMode.Point;
 				generatedAtlas.wrapMode = TextureWrapMode.Clamp;
+
+				Sprites = new Sprite[_spriteRects.Length];
+				for (int i = 0; i < _spriteRects.Length; i++)
+				{
+					Sprites[i] = Sprite.Create(
+						generatedAtlas,
+						_spriteRects[i],
+						new Vector2(0.5f, 0.5f),
+						100f
+					);
+				}
 			}
 			return generatedAtlas;
 		}
