@@ -9,7 +9,7 @@ namespace OriginalLib.SaveLoad
 		[NonSerialized]
 		public readonly string FileName;
 
-		protected virtual bool Encrypt =>
+		public virtual bool Encrypt =>
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 			false;
 #else
@@ -21,12 +21,12 @@ namespace OriginalLib.SaveLoad
 			this.FileName = fileName;
 			SaveManager.AddSaveable(this);
 		}
-		public Saveable() { }
+		private Saveable() { }
 
 		public virtual void Save()
 		{
 			Debug.Log($"<color=white>******************* Save {FileName} **********************</color>\r\n{this}");
-			_ = SaveManager.Save(this, Encrypt);
+			_ = SaveManager.Save(this);
 		}
 
 		public override string ToString() => JsonUtility.ToJson(this, true);

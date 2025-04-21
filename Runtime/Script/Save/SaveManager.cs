@@ -45,8 +45,13 @@ namespace OriginalLib.SaveLoad
 		/// <summary>
 		/// JSONデータを保存する。
 		/// </summary>
-		public static async Task Save<T>(T data, bool encrypt = false) where T : Saveable
+		public static async Task Save<T>(T data) where T : Saveable
 		{
+			if(string.IsNullOrEmpty(data.FileName))
+			{
+				throw new NullReferenceException();
+			}
+
 			if (!s_isAllSave) StartSaveEvent?.Invoke();
 			string saveFolderPath = GetSaveFolderPath();
 			if (!Directory.Exists(saveFolderPath))
@@ -54,15 +59,15 @@ namespace OriginalLib.SaveLoad
 				Directory.CreateDirectory(saveFolderPath);
 			}
 
-			string saveVal = JsonUtility.ToJson(data);
+			string saveVal = JsonUtility.ToJson(data,true);
 
-			if (encrypt)
+			if (data.Encrypt)
 			{
 				// 暗号化処理
 				saveVal = Encryption.Encrypt(saveVal, s_password);
 			}
 
-			string filePath = Path.Combine(saveFolderPath, data.FileName + (encrypt ? ".olson" : ".json"));
+			string filePath = Path.Combine(saveFolderPath, data.FileName + (data.Encrypt ? ".olson" : ".json"));
 			await Task.Run(() => File.WriteAllText(filePath, saveVal));
 			Debug.Log($"Data saved to: {filePath}");
 			if (!s_isAllSave) FinishSaveEvent?.Invoke();
@@ -72,14 +77,14 @@ namespace OriginalLib.SaveLoad
 		/// JSONデータを非同期で保存する。
 		/// 1ファイル保存ごとに次のフレームに持ち越します。
 		/// </summary>
-		public static async Task SaveAllAsync(bool encrypt = false)
+		public static async Task SaveAllAsync()
 		{
 			StartSaveEvent?.Invoke();
 			s_isAllSave = true;
 
 			foreach (var saveable in s_saveableDic)
 			{
-				await Save(saveable.Value, encrypt);
+				await Save(saveable.Value);
 
 				// 次のフレームまで待機
 				await Task.Yield();
