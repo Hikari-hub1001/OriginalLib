@@ -45,12 +45,18 @@ namespace OriginalLib.Sound
 				seGroup = groupes[0];
 			}
 
-			bgmSource = gameObject.AddComponent<AudioSource>();
+			var bgmobj = new GameObject();
+			bgmobj.name = "BGM Object";
+			bgmobj.transform.parent = transform;
+			bgmSource = bgmobj.AddComponent<AudioSource>();
 			bgmSource.outputAudioMixerGroup = bgmGroup;
+			var seobj = new GameObject();
+			seobj.name = "SE Object";
+			seobj.transform.parent = transform;
 			seSourceList = new();
 			for (int i = 0; i < maxPlaySECount; i++)
 			{
-				seSourceList.Add(gameObject.AddComponent<AudioSource>());
+				seSourceList.Add(seobj.AddComponent<AudioSource>());
 				seSourceList[i].outputAudioMixerGroup = seGroup;
 			}
 		}
