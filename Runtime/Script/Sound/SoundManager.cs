@@ -14,43 +14,51 @@ namespace OriginalLib.Sound
 		private readonly string MasterGroupName = "Master";
 		private readonly string SEGroupName = "SE";
 		private readonly string BGMGroupName = "BGM";
-		private readonly string VoiceGroupName = "Voice";
 
 		[Header("Audio Sources")]
 		private AudioSource bgmSource;
-		private AudioSource seSource;
-		private AudioSource voiceSource;
+		private List<AudioSource> seSourceList;
 
 		private AudioMixerGroup bgmGroup;
 		private AudioMixerGroup seGroup;
-		private AudioMixerGroup voiceGroup;
 
 		[Header("Fade Settings")]
 		public float defaultFadeDuration = 0.5f; // フェードイン/アウトの時間
 
 		[SerializeField]
 		private int maxPlaySECount = 10;
-		[SerializeField]
-		private int maxPlayVoiceCount = 10;
 
 		private Coroutine bgmFadeCoroutine;
+
 
 		protected override void Init()
 		{
 			base.Init();
-			bgmGroup = audioMixer.FindMatchingGroups(BGMGroupName)[0];
-			seGroup = audioMixer.FindMatchingGroups(SEGroupName)[0];
-			voiceGroup = audioMixer.FindMatchingGroups(VoiceGroupName)[0];
+			var groupes = audioMixer.FindMatchingGroups(BGMGroupName);
+			if (groupes != null && groupes.Length > 0)
+			{
+				bgmGroup = groupes[0];
+			}
+			groupes = audioMixer.FindMatchingGroups(SEGroupName);
+			if (groupes != null && groupes.Length > 0)
+			{
+				seGroup = groupes[0];
+			}
 
 			bgmSource = gameObject.AddComponent<AudioSource>();
 			bgmSource.outputAudioMixerGroup = bgmGroup;
+			seSourceList = new();
+			for (int i = 0; i < maxPlaySECount; i++)
+			{
+				seSourceList.Add(gameObject.AddComponent<AudioSource>());
+				seSourceList[i].outputAudioMixerGroup = seGroup;
+			}
 		}
 
 		// Audio Mixerのボリュームを設定
 		public void SetMasterVolume(float volume) => SetVolume(MasterGroupName, volume);
 		public void SetSEVolume(float volume) => SetVolume(SEGroupName, volume);
 		public void SetBGMVolume(float volume) => SetVolume(BGMGroupName, volume);
-		public void SetVoiceVolume(float volume) => SetVolume(VoiceGroupName, volume);
 		protected void SetVolume(string groupName, float volume)
 		{
 			float dB = Mathf.Log10(Mathf.Clamp(volume, 0.0001f, 1)) * 20;
@@ -94,37 +102,63 @@ namespace OriginalLib.Sound
 			}
 			else
 			{
-
+				bgmSource.Stop();
 			}
 		}
 
 		// SEの再生
-		public void PlaySE(AudioClip clip, bool loop = false, float volume = 1f, bool fade = false, float fadeDuration = -1.0f)
+		public void PlaySE(AudioClip clip, bool loop = false, float volume = 1f)
 		{
-			seSource.clip = clip;
-			seSource.loop = loop;
-			seSource.volume = volume;
-			seSource.Play();
+			if (!StopSE(clip))
+			{
+				var source = seSourceList[0];
+				seSourceList.RemoveAt(0);
+				seSourceList.Add(source);
+				source.Stop();
+				source.clip = null;
+			}
+			seSourceList[0].clip = clip;
+			seSourceList[0].loop = loop;
+			seSourceList[0].volume = volume;
+			seSourceList[0].Play();
 		}
 
-		// ボイスの再生（ループ可能）
-		public void PlayVoice(AudioClip clip, float volume = 1f, bool fade = false, float fadeDuration = -1.0f)
+		public bool StopSE(AudioClip clip)
 		{
-			voiceSource.clip = clip;
-			voiceSource.volume = volume;
-			voiceSource.Play();
+			for (int i = 0; i < seSourceList.Count; i++)
+			{
+				if (seSourceList[i].clip == clip)
+				{
+					var source = seSourceList[i];
+					seSourceList.RemoveAt(i);
+					seSourceList.Add(source);
+					source.Stop();
+					source.clip = null;
+					return true;
+				}
+			}
+			return false;
 		}
 
-		// ボイスの停止
-		public void StopVoice()
+		public void StopAllSE()
 		{
-			voiceSource.Stop();
+			for (int i = 0; i < seSourceList.Count; i++)
+			{
+				if (seSourceList[i].clip != null)
+				{
+					var source = seSourceList[i];
+					seSourceList.RemoveAt(i);
+					seSourceList.Add(source);
+					source.Stop();
+					source.clip = null;
+				}
+			}
 		}
 
 		// 一時BGM再生後にメインBGMを再生
-		public void PlayBGMWithTransition(AudioClip temporaryBGM, AudioClip mainBGM, float volume = 1f, bool fade = false, float fadeDuration = -1.0f)
+		public void PlayBGMWithIntro(AudioClip introBGM, AudioClip mainBGM, float volume = 1f, bool fade = false, float fadeDuration = -1.0f)
 		{
-			StartCoroutine(PlayTransitionBGM(temporaryBGM, mainBGM, volume));
+			StartCoroutine(PlayTransitionBGM(introBGM, mainBGM, volume));
 		}
 
 		// フェードイン
