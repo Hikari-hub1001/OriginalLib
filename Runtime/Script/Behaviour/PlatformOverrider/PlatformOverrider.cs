@@ -38,6 +38,13 @@ namespace OriginalLib.Behaviour.Platform
 		[SerializeField]
 		public bool activation = true;
 
+		[SerializeField]
+		public Sprite sprite;
+		[SerializeField]
+		public Texture texture;
+		[SerializeField]
+		public string text;
+
 		public OverriderSettings() { }
 		public OverriderSettings(bool useDef)
 		{

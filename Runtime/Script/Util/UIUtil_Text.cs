@@ -13,7 +13,7 @@
 //============================================================================================================================
 
 using UnityEngine;
-#if AVAILABLE_TMP
+#if AVAILABLE_TMP || UNITY_6000
 using TextComponent = TMPro.TextMeshProUGUI;
 #else
 using TextComponent = UnityEngine.UI.Text;
@@ -239,7 +239,7 @@ namespace OriginalLib
 			if (obj == null) { return; }
 			SetTextCol(obj, col);
 		}
-#if AVAILABLE_TMP
+#if AVAILABLE_TMP || UNITY_6000
 		public static void SetTextFontmat(GameObject go, Material material)
 		{
 			if (go == null) { return; }
@@ -247,7 +247,7 @@ namespace OriginalLib
 			if (text == null) { return; }
 			text.material = material;
 		}
-#elif !AVAILABLE_TMP
+#else
 		public static void SetTextFont(GameObject go, Font font)
 		{
 			if (go == null) { return; }
@@ -273,12 +273,12 @@ namespace OriginalLib
 			UIUtil.SetTextCol(go, color);
 		}
 
-#if AVAILABLE_TMP
+#if AVAILABLE_TMP || UNITY_6000
 		public static void SetTextFontmat(this GameObject go, Material material)
 		{
 			UIUtil.SetTextFontmat(go, material);
 		}
-#elif !AVAILABLE_TMP
+#else
 		public static void SetTextFont(this GameObject go,Font font)
 		{
 			UIUtil.SetTextFont(go, font);

@@ -1,8 +1,11 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Reflection;
+using System.Text;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace OriginalLib.Behaviour.Platform
 {
@@ -12,7 +15,20 @@ namespace OriginalLib.Behaviour.Platform
 	{
 
 		private PlatformOverrider _target;
-		private PlatformOverriderGroup pog => PlatformOverriderGroup.Instance;
+		private PlatformOverriderGroup pog
+		{
+			get
+			{
+				try
+				{
+					return PlatformOverriderGroup.Instance;
+				}
+				catch
+				{
+					return null;
+				}
+			}
+		}
 		private OverriderSettings os;
 
 		private RectTransform rect;
@@ -42,7 +58,7 @@ namespace OriginalLib.Behaviour.Platform
 			if (pog == null)
 			{
 				//親にPOGがない場合
-				EditorGUILayout.HelpBox("Please set the 'PlatformOverriderGroup' component within the scene.", MessageType.Info);
+				EditorGUILayout.HelpBox("Please set the 'PlatformOverriderGroup' component within the scene.", MessageType.Error);
 				return;
 			}
 			else
@@ -95,11 +111,36 @@ namespace OriginalLib.Behaviour.Platform
 				}
 			}
 
+			Component[] components = _target.GetComponents<Component>();
+
+			foreach (var comp in components)
+			{
+				if (comp is Image img)
+				{
+					os.sprite = img.sprite;//対象コンポーネントで変化していたらosに反映
+					os.sprite = (Sprite)EditorGUILayout.ObjectField("Sprite", os.sprite, typeof(Sprite), false);//osの変更を確認
+					img.sprite = os.sprite;//osで変化したら対象コンポーネントに反映
+				}
+				else if (comp is RawImage raw)
+				{
+					os.texture = raw.texture;
+					os.texture = (Texture2D)EditorGUILayout.ObjectField("Texture", os.texture, typeof(Texture2D), false);
+					raw.texture = os.texture;
+				}
+				else if (comp is TextMeshProUGUI tmp)
+				{
+					os.text = tmp.text;
+					os.text = EditorGUILayout.TextArea(os.text, GUILayout.Height(80));
+					tmp.text = os.text;
+				}
+			}
+
+
 			_isOptionOpen = EditorGUILayout.Foldout(_isOptionOpen, "Option", true);
 
 			if (_isOptionOpen)
 			{
-				
+
 				EditorGUI.indentLevel++;
 				EditorGUILayout.LabelField("Copy======================================");
 				_copyFrom = (PlatformType)EditorGUILayout.EnumPopup("From", _copyFrom);
@@ -111,16 +152,16 @@ namespace OriginalLib.Behaviour.Platform
 					{
 						var from = SetSetting(_copyFrom);
 						var to = SetSetting(_copyTo);
-						to.position		= from.position;
-						to.anchorMin	= from.anchorMin;
-						to.anchorMax	= from.anchorMax;
-						to.pivot		= from.pivot;
-						to.sizeDelta	= from.sizeDelta;
-						to.offsetMin	= from.offsetMin;
-						to.offsetMax	= from.offsetMax;
-						to.rotation		= from.rotation;
-						to.scale		= from.scale;
-						to.activation	= from.activation;
+						to.position = from.position;
+						to.anchorMin = from.anchorMin;
+						to.anchorMax = from.anchorMax;
+						to.pivot = from.pivot;
+						to.sizeDelta = from.sizeDelta;
+						to.offsetMin = from.offsetMin;
+						to.offsetMax = from.offsetMax;
+						to.rotation = from.rotation;
+						to.scale = from.scale;
+						to.activation = from.activation;
 
 						if (pog.m_SelectTab == _copyTo)
 						{
