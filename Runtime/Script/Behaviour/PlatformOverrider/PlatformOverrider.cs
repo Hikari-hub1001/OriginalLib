@@ -1,5 +1,7 @@
 using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace OriginalLib.Behaviour.Platform
 {
@@ -88,7 +90,6 @@ namespace OriginalLib.Behaviour.Platform
 		private void Start()
 		{
 #if UNITY_EDITOR
-
 			rect = GetComponent<RectTransform>();
 #elif UNITY_IOS || UNITY_ANDROID
 			if(Input.deviceOrientation == DeviceOrientation.Portrait||
@@ -167,7 +168,7 @@ namespace OriginalLib.Behaviour.Platform
 			}
 		}
 
-		void Rect2Os(OverriderSettings os)
+		private void Rect2Os(OverriderSettings os)
 		{
 			if (os.useDefault)
 			{
@@ -188,6 +189,21 @@ namespace OriginalLib.Behaviour.Platform
 			rect.rotation = os.rotation;
 			rect.localScale = os.scale;
 			gameObject.SetActive(os.activation);
+
+			Graphic graphic = GetComponent<Graphic>();
+
+			if (graphic is Image img)
+			{
+				img.sprite = os.sprite;//osで変化したら対象コンポーネントに反映
+			}
+			else if (graphic is RawImage raw)
+			{
+				raw.texture = os.texture;
+			}
+			else if (graphic is TextMeshProUGUI tmp)
+			{
+				tmp.text = os.text;
+			}
 		}
 
 	}

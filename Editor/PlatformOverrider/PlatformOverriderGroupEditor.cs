@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace OriginalLib.Behaviour.Platform
 {
-	[ExecuteInEditMode]
+	//[ExecuteInEditMode]
 	[CustomEditor(typeof(PlatformOverriderGroup))]
 	public class PlatformOverriderGroupEditor : Editor
 	{

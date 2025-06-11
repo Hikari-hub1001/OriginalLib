@@ -1,7 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Reflection;
-using System.Text;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -9,7 +8,7 @@ using UnityEngine.UI;
 
 namespace OriginalLib.Behaviour.Platform
 {
-	[ExecuteInEditMode]
+	//[ExecuteInEditMode]
 	[CustomEditor(typeof(PlatformOverrider))]//拡張するクラスを指定
 	public class PlatformOverriderEditor : Editor
 	{
@@ -111,28 +110,25 @@ namespace OriginalLib.Behaviour.Platform
 				}
 			}
 
-			Component[] components = _target.GetComponents<Component>();
+			Graphic graphic = _target.GetComponent<Graphic>();
 
-			foreach (var comp in components)
+			if (graphic is Image img)
 			{
-				if (comp is Image img)
-				{
-					os.sprite = img.sprite;//対象コンポーネントで変化していたらosに反映
-					os.sprite = (Sprite)EditorGUILayout.ObjectField("Sprite", os.sprite, typeof(Sprite), false);//osの変更を確認
-					img.sprite = os.sprite;//osで変化したら対象コンポーネントに反映
-				}
-				else if (comp is RawImage raw)
-				{
-					os.texture = raw.texture;
-					os.texture = (Texture2D)EditorGUILayout.ObjectField("Texture", os.texture, typeof(Texture2D), false);
-					raw.texture = os.texture;
-				}
-				else if (comp is TextMeshProUGUI tmp)
-				{
-					os.text = tmp.text;
-					os.text = EditorGUILayout.TextArea(os.text, GUILayout.Height(80));
-					tmp.text = os.text;
-				}
+				os.sprite = img.sprite;//対象コンポーネントで変化していたらosに反映
+				os.sprite = (Sprite)EditorGUILayout.ObjectField("Sprite", os.sprite, typeof(Sprite), false);//osの変更を確認
+				img.sprite = os.sprite;//osで変化したら対象コンポーネントに反映
+			}
+			else if (graphic is RawImage raw)
+			{
+				os.texture = raw.texture;
+				os.texture = (Texture)EditorGUILayout.ObjectField("Texture", os.texture, typeof(Texture), false);
+				raw.texture = os.texture;
+			}
+			else if (graphic is TextMeshProUGUI tmp)
+			{
+				os.text = tmp.text;
+				os.text = EditorGUILayout.TextArea(os.text, GUILayout.Height(80));
+				tmp.text = os.text;
 			}
 
 
@@ -204,6 +200,21 @@ namespace OriginalLib.Behaviour.Platform
 				os.rotation = rect.rotation;
 				os.scale = rect.localScale;
 				os.activation = _target.gameObject.activeSelf;
+				
+				Graphic graphic = _target.GetComponent<Graphic>();
+
+				if (graphic is Image img)
+				{
+					os.sprite = img.sprite;//osで変化したら対象コンポーネントに反映
+				}
+				else if (graphic is RawImage raw)
+				{
+					os.texture = raw.texture;
+				}
+				else if (graphic is TextMeshProUGUI tmp)
+				{
+					os.text = tmp.text;
+				}
 			}
 			else
 			{
@@ -218,6 +229,21 @@ namespace OriginalLib.Behaviour.Platform
 				setting.rotation = rect.rotation;
 				setting.scale = rect.localScale;
 				setting.activation = _target.gameObject.activeSelf;
+
+				Graphic graphic = _target.GetComponent<Graphic>();
+
+				if (graphic is Image img)
+				{
+					setting.sprite = img.sprite;//osで変化したら対象コンポーネントに反映
+				}
+				else if (graphic is RawImage raw)
+				{
+					setting.texture = raw.texture;
+				}
+				else if (graphic is TextMeshProUGUI tmp)
+				{
+					setting.text = tmp.text;
+				}
 			}
 		}
 
@@ -238,6 +264,22 @@ namespace OriginalLib.Behaviour.Platform
 				rect.rotation = os.rotation;
 				rect.localScale = os.scale;
 				_target.gameObject.SetActive(os.activation);
+
+				Graphic graphic = _target.GetComponent<Graphic>();
+
+				if (graphic is Image img)
+				{
+					img.sprite = os.sprite;//osで変化したら対象コンポーネントに反映
+				}
+				else if (graphic is RawImage raw)
+				{
+					raw.texture = os.texture;
+				}
+				else if (graphic is TextMeshProUGUI tmp)
+				{
+					tmp.text = os.text;
+				}
+
 			}
 			else
 			{
@@ -252,6 +294,22 @@ namespace OriginalLib.Behaviour.Platform
 				rect.rotation = setting.rotation;
 				rect.localScale = setting.scale;
 				_target.gameObject.SetActive(setting.activation);
+
+				Graphic graphic = _target.GetComponent<Graphic>();
+
+				if (graphic is Image img)
+				{
+					img.sprite = setting.sprite;//osで変化したら対象コンポーネントに反映
+				}
+				else if (graphic is RawImage raw)
+				{
+					raw.texture = setting.texture;
+				}
+				else if (graphic is TextMeshProUGUI tmp)
+				{
+					tmp.text = setting.text;
+				}
+
 			}
 		}
 
