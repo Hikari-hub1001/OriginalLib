@@ -5,8 +5,6 @@
         "OriginalLib",
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
-        "DOTween.Modules",
-        "DOTweenPro.Scripts",
         "Unity.InputSystem"
     ],
     "includePlatforms": [

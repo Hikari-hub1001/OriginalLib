@@ -3,6 +3,6 @@
   "author": "HiKaRi",
   "version": "0.0.0",
   "displayName": "OriginalLib",
-  "description": "This is a test package",
+  "description": "This is \"OriginalLib\".\nWe do not guarantee the absence of bugs when using this package.\nSome features utilize \"DoTween\".\nIf DoTween is not included and these features are used, an error message will be displayed in the Editor, and an exception will occur when running the build.\n\nDoTween-Pro\nhttps://assetstore.unity.com/packages/tools/visual-scripting/dotween-pro-32416\nDoTween\nhttps://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676",
   "unity": "2022.3"
 }

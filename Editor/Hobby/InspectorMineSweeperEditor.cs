@@ -45,7 +45,7 @@ namespace OriginalLib.Hobby
 
 		private void InisCell()
 		{
-			int[] bombs = RandomUtil.GetUniqueRandomNumbers(0, 100, 10);
+			int[] bombs = RandomUtil.GetUniqueRandomNumbers(0, 100, 10) as int[];
 			//bomb
 			for (int i = 0; i < cells.GetLength(0); i++)
 			{
