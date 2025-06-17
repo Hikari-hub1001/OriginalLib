@@ -101,7 +101,7 @@ namespace OriginalLib.SaveLoad
 		/// <param name="fileName">読み込むファイルの名前。</param>
 		/// <param name="decrypt">復号化する場合は true。</param>
 		/// <returns>読み込んだオブジェクト。</returns>
-		public static T Load<T>(string fileName, bool decrypt = false) where T : Saveable, new()
+		public static T Load<T>(string fileName, bool decrypt = false) where T : Saveable
 		{
 			string saveFolderPath = GetSaveFolderPath();
 			string filePath = Path.Combine(saveFolderPath, fileName + (decrypt ? ".olson" : ".json"));
