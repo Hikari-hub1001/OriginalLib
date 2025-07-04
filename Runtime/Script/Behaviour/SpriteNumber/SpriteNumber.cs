@@ -305,6 +305,7 @@ namespace OriginalLib.Behaviour
 
 				var sprite = NumberAtlas.Sprites[i];
 				if (sprite == null) continue;
+				if (sprite.rect.height == 0) continue;
 
 				float aspect = sprite.rect.width / sprite.rect.height;
 				totalWidth += preferredHeight * aspect;
