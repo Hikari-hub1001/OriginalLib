@@ -113,6 +113,8 @@ namespace OriginalLib.Behaviour
 				if (NumberAtlas?.Sprites[index] == null) continue;
 
 				var uv = NumberAtlas.Sprites[index].rect;
+				if (uv == null) continue;
+				if (uv.height == 0) continue;
 				float aspect = uv.width / uv.height;
 				float drawWidth = preferredHeight * aspect;
 
