@@ -29,7 +29,7 @@ namespace OriginalLib.Behaviour
 		/// </summary>
 		public float Spacing = 0.0f;
 
-		[SerializeField] protected T Value;
+		[SerializeField] public T Value;
 		protected T _oldValue;
 
 		/// <summary>
