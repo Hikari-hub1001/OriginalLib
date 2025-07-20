@@ -7,16 +7,106 @@ using UnityEngine.UI;
 namespace OriginalLib.Behaviour
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	public abstract class SpriteNumbarBase : MaskableGraphic
+	public abstract class SpriteNumberBase : MaskableGraphic
 	{
-		public override Texture mainTexture => NumberAtlas?.GetAtlas() ?? s_WhiteTexture;
+		public override Texture mainTexture => FirstValidTexture;
+		private Texture FirstValidTexture
+		{
+			get
+			{
+				for (int i = 0; i <= 13; i++)
+				{
+					var sprite = GetSprite(i);
+					if (sprite != null)
+						return sprite.texture;
+				}
+				return null;
+			}
+		}
+
+		public bool TextureCheck()
+		{
+			Texture texture = null;
+			for (int i = 0; i <= 13; i++)
+			{
+				var sprite = GetSprite(i);
+				if (sprite != null)
+					if (texture == null)
+						texture = sprite.texture;
+					else if (texture != sprite.texture)
+						return false;
+			}
+			return true;
+		}
 
 		/// <summary>
 		/// 表示用アトラス画像
 		/// </summary>
-		public SpriteNumberAtlasSO NumberAtlas;
+		//public SpriteNumberAtlasSO NumberAtlas;
+		[SerializeField] protected Sprite _zero;
+		[SerializeField] protected Sprite _one;
+		[SerializeField] protected Sprite _two;
+		[SerializeField] protected Sprite _three;
+		[SerializeField] protected Sprite _four;
+		[SerializeField] protected Sprite _five;
+		[SerializeField] protected Sprite _six;
+		[SerializeField] protected Sprite _seven;
+		[SerializeField] protected Sprite _eight;
+		[SerializeField] protected Sprite _nine;
+		[SerializeField] protected Sprite _plus;
+		[SerializeField] protected Sprite _minus;
+		[SerializeField] protected Sprite _point;
+		[SerializeField] protected Sprite _separator;
+		public Sprite GetSprite(int i)
+		{
+			return i switch
+			{
+				0 => _zero,
+				1 => _one,
+				2 => _two,
+				3 => _three,
+				4 => _four,
+				5 => _five,
+				6 => _six,
+				7 => _seven,
+				8 => _eight,
+				9 => _nine,
+				10 => _plus,
+				11 => _minus,
+				12 => _point,
+				13 => _separator,
+				_ => null
+			};
+		}
+
+		public void SetSprite(int i, Sprite sp)
+		{
+			if (sp != null && FirstValidTexture != sp.texture)
+			{
+				Debug.LogWarning($"Sprite assigned to index {i} has a different texture than the others. This may cause rendering issues in the UI. ({sp.name})", this);
+			}
+
+			switch (i)
+			{
+				case 0:_zero = sp;break;
+				case 1:_one = sp;break;
+				case 2:_two = sp;break;
+				case 3:_three = sp;break;
+				case 4:_four = sp;break;
+				case 5:_five = sp;break;
+				case 6:_six = sp;break;
+				case 7:_seven = sp;break;
+				case 8:_eight = sp;break;
+				case 9:_nine = sp;break;
+				case 10:_plus = sp;break;
+				case 11:_minus = sp;break;
+				case 12:_point = sp;break;
+				case 13:_separator = sp; break;
+				default: throw new ArgumentOutOfRangeException();
+			}
+		}
 	}
-	public abstract class SpriteNumber<T> : SpriteNumbarBase
+	public abstract class SpriteNumber<T> : SpriteNumberBase
 	{
 		/// <summary>
 		/// 画像サイズ
@@ -31,6 +121,7 @@ namespace OriginalLib.Behaviour
 
 		[SerializeField] public T Value;
 		protected T _oldValue;
+		protected string formattedNumber = "";
 
 		/// <summary>
 		/// 整数部の0埋め
@@ -77,31 +168,23 @@ namespace OriginalLib.Behaviour
 		protected override void OnPopulateMesh(VertexHelper vh)
 		{
 			vh.Clear();
-			if (NumberAtlas == null || NumberAtlas.GetAtlas() == null || NumberAtlas.Sprites == null) return;
-
-			float height = preferredHeight;
-			float atlasRatio = NumberAtlas.GetAtlas().width / (float)NumberAtlas.GetAtlas().height;
 
 			// 各スプライトの幅を計算しながら、合計幅＋スペースも計算
 			List<float> spriteWidths = new();
-			float totalWidth = 0f;
 
 			string numberStr = FormatNumber();
 
 			foreach (char c in numberStr)
 			{
 				var index = GetIndexForChar(c);
-				if (index < 0 || index >= NumberAtlas.Sprites.Length) continue;
-				if (NumberAtlas?.Sprites[index] == null) continue;
+				if (index < 0) continue;
+				if (GetSprite(index) == null) continue;
 
-				float width = NumberAtlas.Sprites[index].rect.width;
+				float width = GetSprite(index).rect.width;
 				spriteWidths.Add(width);
-				totalWidth += width;
 			}
 
 			// スペース追加（スプライトが2個以上あれば間に spacing * (count - 1) 入る）
-			if (spriteWidths.Count > 1)
-				totalWidth += Spacing * (spriteWidths.Count - 1);
 
 			float offsetX = 0f;
 			Vector2 pivotOffset = new Vector2(-rectTransform.pivot.x * rectTransform.sizeDelta.x, -rectTransform.pivot.y * preferredHeight);
@@ -109,10 +192,10 @@ namespace OriginalLib.Behaviour
 			foreach (char c in numberStr)
 			{
 				var index = GetIndexForChar(c);
-				if (index < 0 || index >= NumberAtlas.Sprites.Length) continue;
-				if (NumberAtlas?.Sprites[index] == null) continue;
+				if (index < 0) continue;
+				if (GetSprite(index) == null) continue;
 
-				var uv = NumberAtlas.Sprites[index].rect;
+				var uv = GetSprite(index).rect;
 				if (uv == null) continue;
 				if (uv.height == 0) continue;
 				float aspect = uv.width / uv.height;
@@ -124,7 +207,6 @@ namespace OriginalLib.Behaviour
 				AddQuad(vh, rect, color, uv);
 				offsetX += drawWidth + Spacing;
 			}
-
 		}
 
 		int GetIndexForChar(char c)
@@ -162,9 +244,10 @@ namespace OriginalLib.Behaviour
 		{
 			if (Value == null) throw new ArgumentNullException(nameof(Value));
 
+			if (!string.IsNullOrEmpty(formattedNumber) && Value.Equals(_oldValue)) return formattedNumber;
+
 			// 型を判定して decimal に統一（精度優先）
 			decimal value;
-
 			switch (Value)
 			{
 				case int i: value = i; break;
@@ -275,6 +358,7 @@ namespace OriginalLib.Behaviour
 			return new string(chars.ToArray());
 		}
 
+
 		private void ApplyRectLock()
 		{
 			tracker.Clear();
@@ -294,8 +378,6 @@ namespace OriginalLib.Behaviour
 
 		private void UpdateRectSize()
 		{
-			if (NumberAtlas == null || NumberAtlas.Sprites == null || NumberAtlas.Sprites.Length == 0) return;
-
 			float totalWidth = 0f;
 			int visibleCount = 0;
 
@@ -303,9 +385,9 @@ namespace OriginalLib.Behaviour
 			foreach (char c in numberStr)
 			{
 				var i = GetIndexForChar(c);
-				if (i < 0 || i >= NumberAtlas.Sprites.Length) continue;
+				if (i < 0) continue;
 
-				var sprite = NumberAtlas.Sprites[i];
+				var sprite = GetSprite(i);
 				if (sprite == null) continue;
 				if (sprite.rect.height == 0) continue;
 

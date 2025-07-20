@@ -5,7 +5,8 @@
         "OriginalLib",
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.2D.Sprite.Editor"
     ],
     "includePlatforms": [
         "Editor"
