@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 #if AVAILABLE_ADDRESSABLES
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 #endif
 using UnityEngine.Audio;
 using UnityEngine.Pool;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace OriginalLib.Sound
 {
